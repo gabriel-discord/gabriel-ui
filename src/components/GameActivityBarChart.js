@@ -80,7 +80,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() 
   const labels = [];
   const date = now.clone();
   for (let i = 0; i < numIterations; i++) {
-    labels.push(date.format('YYYY-MM-DD'));
+    labels.push(date.format('MM/DD'));
     date.subtract(1, 'day');
   }
   labels.reverse();

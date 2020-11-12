@@ -1,21 +1,26 @@
-import React from "react";
-import { Select, Radio } from "antd";
-import _ from "lodash";
+import React from 'react';
+import { Select, Radio } from 'antd';
+import _ from 'lodash';
 
-import { TimePeriod } from "../types";
+import { TimePeriod } from '../types';
 
 const aliases = {
-  Ion: [/chris/i, /sirch/i],
-  solewolf: [/kitkat/i, /keith/i, /kit/i],
-  lobabob: [/farhan/i, /fkd/i],
   Acidn420: [/jesus/i],
+  alikhanx12: [/ali/i],
+  Aly: [/ally/i],
   bobninjasub1: [/rehan/i, /re+/i],
+  Gandalf: [/ian/i, /nighthank/i, /nightwing/i],
+  hackerman: [/ryan/i, /rein/i],
+  Ion: [/chris/i, /sirch/i],
+  Janix: [/jake/i],
+  jarkyll: [/nabeel/i],
+  lobabob: [/farhan/i, /fkd/i],
+  'Not Kevin': [/kevin/i],
+  solewolf: [/kitkat/i, /keith/i, /kit/i],
 };
 
 const SearchFilters = ({ data, onChange, value }) => {
-  const users = _.uniq(data.map(({ user }) => user)).sort((a, b) =>
-    a.localeCompare(b)
-  );
+  const users = _.uniq(data.map(({ user }) => user)).sort((a, b) => a.localeCompare(b));
   const gameSet = new Set(data.map((entry) => entry.game));
   const gameOptions = Array.from(gameSet)
     .map((game) => ({
@@ -44,15 +49,11 @@ const SearchFilters = ({ data, onChange, value }) => {
           for (let i = 0; i < names.length; i++) {
             const name = names[i];
             const regexes = aliases[name];
-            if (
-              regexes.some((regex) => regex.test(input) && name === optionName)
-            ) {
+            if (regexes.some((regex) => regex.test(input) && name === optionName)) {
               return true;
             }
           }
-          return (
-            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-          );
+          return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
         }}
       >
         {users.map((user) => (
@@ -68,19 +69,19 @@ const SearchFilters = ({ data, onChange, value }) => {
         onChange={(e) => onChange({ ...value, timePeriod: e.target.value })}
         options={[
           {
-            label: "24 Hours",
+            label: '24 Hours',
             value: TimePeriod.DAY,
           },
           {
-            label: "7 Days",
+            label: '7 Days',
             value: TimePeriod.WEEK,
           },
           {
-            label: "30 Days",
+            label: '30 Days',
             value: TimePeriod.MONTH,
           },
           {
-            label: "Forever",
+            label: 'Forever',
             value: TimePeriod.FOREVER,
           },
         ]}
@@ -90,7 +91,7 @@ const SearchFilters = ({ data, onChange, value }) => {
         mode="multiple"
         allowClear
         placeholder="Compare games..."
-        style={{ width: 648, display: "block", marginBottom: 16 }}
+        style={{ width: 648, display: 'block', marginBottom: 16 }}
         value={value.games}
         onChange={(games) => onChange({ ...value, games })}
       >

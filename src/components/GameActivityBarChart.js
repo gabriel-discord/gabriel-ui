@@ -7,7 +7,7 @@ import _ from 'lodash';
 
 const GAME_THRESHOLD = 5;
 
-const GameActivityBarChart = ({ data, timePeriod, height, games }) => {
+const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() }) => {
   // calculate duration in seconds for each game
   const durationPerGame = {};
   data.forEach(({ game, seconds }) => {
@@ -59,7 +59,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games }) => {
 
   const datasets = Array.from(gameSet)
     .map((game) => {
-      const date = moment();
+      const date = now.clone();
       const data = [];
       for (let i = 0; i < numIterations; i++) {
         const dateString = date.format('MM/D/YYYY');
@@ -78,7 +78,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games }) => {
     });
 
   const labels = [];
-  const date = moment();
+  const date = now.clone();
   for (let i = 0; i < numIterations; i++) {
     labels.push(date.format('YYYY-MM-DD'));
     date.subtract(1, 'day');
@@ -101,7 +101,11 @@ const GameActivityBarChart = ({ data, timePeriod, height, games }) => {
         {
           stacked: true,
           ticks: {
-            callback: (value) => humanizeDurationShort(value * 1000),
+            callback: (value) =>
+              humanizeDurationShort(value * 1000, {
+                units: ['h'],
+                round: true,
+              }),
           },
         },
       ],

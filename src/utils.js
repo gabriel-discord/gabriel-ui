@@ -17,7 +17,5 @@ export const humanizeDurationShort = humanizeDuration.humanizer({
     },
   },
   spacer: '',
-  serialComma: false,
-  units: ['h'],
-  round: true,
+  delimiter: ' ',
 });

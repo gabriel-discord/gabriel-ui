@@ -5,6 +5,7 @@ import moment from 'moment';
 import SearchFilters from './components/SearchFilters';
 import GameActivityPieChart from './components/GameActivityPieChart';
 import GameActivityBarChart from './components/GameActivityBarChart';
+import ActivePlaytimeChart from './components/ActivePlaytimeChart';
 import { TimePeriod } from './types';
 import { dateFormat } from './utils';
 
@@ -15,6 +16,7 @@ import mockData from './mock';
 const { Header, Content } = Layout;
 
 function App() {
+  const now = moment(); // use to mock the current date for older data
   const [searchParams, setSearchParams] = useState({
     user: null,
     timePeriod: TimePeriod.WEEK,
@@ -26,7 +28,7 @@ function App() {
   let filteredData = user ? mockData.filter((entry) => user === entry.user) : mockData;
 
   if (timePeriod !== TimePeriod.FOREVER) {
-    const cutoffDate = moment().subtract(timePeriod, 'days');
+    const cutoffDate = now.clone().subtract(timePeriod, 'days');
     filteredData = filteredData.filter((entry) =>
       moment(entry.start, dateFormat).isAfter(cutoffDate),
     );
@@ -62,9 +64,15 @@ function App() {
         />
         <Row>
           <Col span={12}>
-            <Card>
+            <Card style={{ height: 330 }}>
               <h2>Games Played</h2>
               <GameActivityPieChart data={filteredData} />
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card style={{ height: 330 }}>
+              <h2>Activity Trend</h2>
+              <ActivePlaytimeChart data={filteredData} timePeriod={timePeriod} />
             </Card>
           </Col>
         </Row>
@@ -81,6 +89,7 @@ function App() {
                 data={filteredData}
                 timePeriod={timePeriod}
                 games={new Set(games)}
+                now={now}
               />
             </Card>
           </Col>

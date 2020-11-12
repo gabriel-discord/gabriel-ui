@@ -1,15 +1,16 @@
-import React, { useState } from "react";
-import { Card, Row, Col, Layout } from "antd";
-import moment from "moment";
+import React, { useState } from 'react';
+import { Card, Row, Col, Layout } from 'antd';
+import moment from 'moment';
 
-import SearchFilters from "./components/SearchFilters";
-import GameActivityPieChart from "./components/GameActivityPieChart";
-import GameActivityBarChart from "./components/GameActivityBarChart";
-import { TimePeriod } from "./types";
+import SearchFilters from './components/SearchFilters';
+import GameActivityPieChart from './components/GameActivityPieChart';
+import GameActivityBarChart from './components/GameActivityBarChart';
+import { TimePeriod } from './types';
+import { dateFormat } from './utils';
 
-import "./App.scss";
+import './App.scss';
 
-import mockData from "./mock";
+import mockData from './mock';
 
 const { Header, Content } = Layout;
 
@@ -17,30 +18,41 @@ function App() {
   const [searchParams, setSearchParams] = useState({
     user: null,
     timePeriod: TimePeriod.WEEK,
-    selectedGames: [],
+    games: [],
   });
-  let filteredData = searchParams.user
-    ? mockData.filter((entry) => searchParams.user === entry.user)
-    : mockData;
 
-  if (searchParams.timePeriod !== TimePeriod.FOREVER) {
-    const cutoffDate = moment().subtract(searchParams.timePeriod, "days");
+  const { games, timePeriod, user } = searchParams;
+
+  let filteredData = user ? mockData.filter((entry) => user === entry.user) : mockData;
+
+  if (timePeriod !== TimePeriod.FOREVER) {
+    const cutoffDate = moment().subtract(timePeriod, 'days');
     filteredData = filteredData.filter((entry) =>
-      moment(entry.start).isAfter(cutoffDate)
+      moment(entry.start, dateFormat).isAfter(cutoffDate),
     );
+  }
+
+  if (games.length > 0) {
+    const gameSet = new Set(games);
+    filteredData = filteredData.filter(({ game }) => {
+      if (gameSet.size === 0) {
+        return true;
+      }
+      return gameSet.has(game);
+    });
   }
 
   return (
     <Layout>
       <Header>
-        <h1 style={{ color: "#fafafa" }}>Gabriel</h1>
+        <h1 style={{ color: '#fafafa' }}>Gabriel</h1>
       </Header>
       <Content
         style={{
-          padding: "24px 40px",
+          padding: '24px 40px',
           maxWidth: 1100,
-          width: "100%",
-          margin: "0 auto",
+          width: '100%',
+          margin: '0 auto',
         }}
       >
         <SearchFilters
@@ -52,10 +64,7 @@ function App() {
           <Col span={12}>
             <Card>
               <h2>Games Played</h2>
-              <GameActivityPieChart
-                data={filteredData}
-                games={new Set(searchParams.games)}
-              />
+              <GameActivityPieChart data={filteredData} />
             </Card>
           </Col>
         </Row>
@@ -70,8 +79,8 @@ function App() {
               <GameActivityBarChart
                 height={400}
                 data={filteredData}
-                timePeriod={searchParams.timePeriod}
-                games={new Set(searchParams.games)}
+                timePeriod={timePeriod}
+                games={new Set(games)}
               />
             </Card>
           </Col>

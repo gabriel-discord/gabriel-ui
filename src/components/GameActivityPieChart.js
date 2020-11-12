@@ -1,24 +1,17 @@
-import React from "react";
-import { Doughnut } from "react-chartjs-2";
-import randomColor from "randomcolor";
-import humanizeDuration from "humanize-duration";
+import React from 'react';
+import { Doughnut } from 'react-chartjs-2';
+import randomColor from 'randomcolor';
+import humanizeDuration from 'humanize-duration';
 
 const GAME_ACTIVITY_LIMIT = 7;
 
-const GameActivityPieChart = ({ data, games: selectedGames }) => {
+const GameActivityPieChart = ({ data }) => {
   const activityPerGame = {};
 
-  data
-    .filter(({ game }) => {
-      if (selectedGames.size === 0) {
-        return true;
-      }
-      return selectedGames.has(game);
-    })
-    .forEach(({ game, seconds }) => {
-      activityPerGame[game] = activityPerGame[game] || 0;
-      activityPerGame[game] += seconds;
-    });
+  data.forEach(({ game, seconds }) => {
+    activityPerGame[game] = activityPerGame[game] || 0;
+    activityPerGame[game] += seconds;
+  });
 
   const gameActivityData = Object.entries(activityPerGame)
     .map(([game, seconds]) => ({
@@ -31,7 +24,7 @@ const GameActivityPieChart = ({ data, games: selectedGames }) => {
   const formattedData = gameActivityData.slice(0, GAME_ACTIVITY_LIMIT);
   if (gameActivityData.length > GAME_ACTIVITY_LIMIT) {
     formattedData.push({
-      game: "Other",
+      game: 'Other',
       seconds: gameActivityData
         .slice(GAME_ACTIVITY_LIMIT)
         .reduce((acc, curr) => acc + curr.seconds, 0),
@@ -49,7 +42,7 @@ const GameActivityPieChart = ({ data, games: selectedGames }) => {
       },
     },
     legend: {
-      position: "right",
+      position: 'right',
     },
   };
 
@@ -59,9 +52,7 @@ const GameActivityPieChart = ({ data, games: selectedGames }) => {
         datasets: [
           {
             data: formattedData.map((activity) => activity.seconds),
-            backgroundColor: formattedData.map((a) =>
-              randomColor({ seed: a.game })
-            ),
+            backgroundColor: formattedData.map((a) => randomColor({ seed: a.game })),
           },
         ],
         labels: formattedData.map((a) => a.game),

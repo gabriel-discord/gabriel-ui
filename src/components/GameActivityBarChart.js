@@ -1,31 +1,19 @@
-import React from "react";
-import moment from "moment";
-import { Bar } from "react-chartjs-2";
-import randomColor from "randomcolor";
-import humanizeDuration from "humanize-duration";
-import _ from "lodash";
+import React from 'react';
+import moment from 'moment';
+import { Bar } from 'react-chartjs-2';
+import randomColor from 'randomcolor';
+import { humanizeDurationShort } from '../utils';
+import _ from 'lodash';
 
 const GAME_THRESHOLD = 5;
 
-const GameActivityBarChart = ({
-  data,
-  timePeriod,
-  height,
-  games: selectedGames,
-}) => {
+const GameActivityBarChart = ({ data, timePeriod, height, games }) => {
   // calculate duration in seconds for each game
   const durationPerGame = {};
-  data
-    .filter(({ game }) => {
-      if (selectedGames.size === 0) {
-        return true;
-      }
-      return selectedGames.has(game);
-    })
-    .forEach(({ game, seconds }) => {
-      durationPerGame[game] = durationPerGame[game] ?? 0;
-      durationPerGame[game] += seconds;
-    });
+  data.forEach(({ game, seconds }) => {
+    durationPerGame[game] = durationPerGame[game] ?? 0;
+    durationPerGame[game] += seconds;
+  });
 
   // calculate top N games to display based on duration
   const topGames = new Set(
@@ -33,7 +21,7 @@ const GameActivityBarChart = ({
       .map(([game, seconds]) => ({ game, seconds }))
       .sort((a, b) => b.seconds - a.seconds)
       .slice(0, GAME_THRESHOLD)
-      .map(({ game }) => game)
+      .map(({ game }) => game),
   );
 
   // group each entry by date
@@ -56,21 +44,12 @@ const GameActivityBarChart = ({
     const gameGroup = _.groupBy(dataArr, (entry) => entry.game);
     // group duration by seconds per game
     Object.entries(gameGroup).forEach(([game, entries]) => {
-      if (
-        topGames.has(game) ||
-        (selectedGames.size > 0 && selectedGames.has(game))
-      ) {
+      if (topGames.has(game) || games.size > 0) {
         gameSet.add(game);
-        gameDurationPerDay[date][game] = entries.reduce(
-          (acc, curr) => acc + curr.seconds,
-          0
-        );
-      } else if (selectedGames.size === 0) {
-        gameSet.add("Other");
-        gameDurationPerDay[date]["Other"] = entries.reduce(
-          (acc, curr) => acc + curr.seconds,
-          0
-        );
+        gameDurationPerDay[date][game] = entries.reduce((acc, curr) => acc + curr.seconds, 0);
+      } else if (games.size === 0) {
+        gameSet.add('Other');
+        gameDurationPerDay[date]['Other'] = entries.reduce((acc, curr) => acc + curr.seconds, 0);
       }
     });
   });
@@ -83,10 +62,10 @@ const GameActivityBarChart = ({
       const date = moment();
       const data = [];
       for (let i = 0; i < numIterations; i++) {
-        const dateString = date.format("MM/D/YYYY");
+        const dateString = date.format('MM/D/YYYY');
         const seconds = gameDurationPerDay[dateString]?.[game] ?? 0;
         data.push(seconds);
-        date.subtract(1, "days");
+        date.subtract(1, 'days');
       }
       return {
         label: game,
@@ -101,8 +80,8 @@ const GameActivityBarChart = ({
   const labels = [];
   const date = moment();
   for (let i = 0; i < numIterations; i++) {
-    labels.push(date.format("YYYY-MM-DD"));
-    date.subtract(1, "day");
+    labels.push(date.format('YYYY-MM-DD'));
+    date.subtract(1, 'day');
   }
   labels.reverse();
 
@@ -122,28 +101,7 @@ const GameActivityBarChart = ({
         {
           stacked: true,
           ticks: {
-            callback: (value, index, values) => {
-              const shortHumanizer = humanizeDuration.humanizer({
-                language: "shortEn",
-                languages: {
-                  shortEn: {
-                    y: () => "y",
-                    mo: () => "mo",
-                    w: () => "w",
-                    d: () => "d",
-                    h: () => "h",
-                    m: () => "m",
-                    s: () => "s",
-                    ms: () => "ms",
-                  },
-                },
-                spacer: "",
-                serialComma: false,
-                units: ["h"],
-                round: true,
-              });
-              return shortHumanizer(value * 1000);
-            },
+            callback: (value) => humanizeDurationShort(value * 1000),
           },
         },
       ],
@@ -153,9 +111,7 @@ const GameActivityBarChart = ({
         label: (tooltipItem, data) => {
           const { datasetIndex, index } = tooltipItem;
           const seconds = data.datasets[datasetIndex].data[index];
-          return `${data.datasets[datasetIndex].label}:\n${humanizeDuration(
-            seconds * 1000
-          )}`;
+          return `${data.datasets[datasetIndex].label}:\n${humanizeDurationShort(seconds * 1000)}`;
         },
       },
     },

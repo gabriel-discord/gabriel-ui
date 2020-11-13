@@ -20,7 +20,7 @@ const { Header, Content } = Layout;
 function App() {
   const now = moment('2020-11-11'); // use to mock the current date for older data
   const [searchParams, setSearchParams] = useState({
-    user: null,
+    user: undefined,
     timePeriod: TimePeriod.WEEK,
     games: [],
   });

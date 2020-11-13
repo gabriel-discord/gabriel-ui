@@ -4,6 +4,7 @@ import { Line } from 'react-chartjs-2';
 import moment from 'moment';
 import randomColor from 'randomcolor';
 import PropTypes from 'prop-types';
+import normalize from 'array-normalize';
 
 import { dateFormat, humanizeDurationShort } from '../utils';
 
@@ -74,7 +75,7 @@ const ActivePlaytimeChart = ({ data, games }) => {
       return {
         label: game,
         borderColor: randomColor({ seed: game }),
-        data: Object.values(gameData),
+        data: normalize(Object.values(gameData)),
         fill: false,
       };
     });
@@ -85,7 +86,7 @@ const ActivePlaytimeChart = ({ data, games }) => {
         label: 'Playtime',
         borderColor: '#95de64',
         fill: false,
-        data: Object.values(durationPerHour),
+        data: normalize(Object.values(durationPerHour)),
       },
     ];
   }

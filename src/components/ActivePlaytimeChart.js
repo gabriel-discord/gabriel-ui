@@ -3,6 +3,7 @@ import { Radio } from 'antd';
 import { Line } from 'react-chartjs-2';
 import moment from 'moment';
 import randomColor from 'randomcolor';
+import PropTypes from 'prop-types';
 
 import { dateFormat, humanizeDurationShort } from '../utils';
 
@@ -126,17 +127,7 @@ const ActivePlaytimeChart = ({ data, games }) => {
       ],
     },
     tooltips: {
-      callbacks: {
-        label: (tooltipItem, data) => {
-          const { datasetIndex, index } = tooltipItem;
-          const seconds = data.datasets[datasetIndex].data[index];
-          const durationString = humanizeDurationShort(seconds * 1000, {
-            units: ['h', 'm'],
-            round: true,
-          });
-          return `${data.datasets[datasetIndex].label}:\n${durationString}`;
-        },
-      },
+      enabled: false,
     },
   };
   chart = <Line data={barData} options={options} height={230} />;
@@ -173,6 +164,12 @@ const ActivePlaytimeChart = ({ data, games }) => {
       <div>{chart}</div>
     </>
   );
+};
+
+ActivePlaytimeChart.propTypes = {
+  data: PropTypes.array.isRequired,
+  timePeriod: PropTypes.number.isRequired,
+  games: PropTypes.array.isRequired,
 };
 
 export default ActivePlaytimeChart;

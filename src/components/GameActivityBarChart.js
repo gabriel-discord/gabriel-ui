@@ -2,6 +2,8 @@ import React from 'react';
 import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
+import PropTypes from 'prop-types';
+
 import { humanizeDurationShort } from '../utils';
 import { TimePeriod } from '../types';
 import _ from 'lodash';
@@ -9,6 +11,7 @@ import _ from 'lodash';
 const GAME_THRESHOLD = 5;
 
 const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() }) => {
+  const selectedGameSet = new Set(games);
   // calculate duration in seconds for each game
   const durationPerGame = {};
   data.forEach(({ game, seconds }) => {
@@ -45,10 +48,10 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() 
     const gameGroup = _.groupBy(dataArr, (entry) => entry.game);
     // group duration by seconds per game
     Object.entries(gameGroup).forEach(([game, entries]) => {
-      if (topGames.has(game) || games.size > 0) {
+      if (topGames.has(game) || selectedGameSet.size > 0) {
         gameSet.add(game);
         gameDurationPerDay[date][game] = entries.reduce((acc, curr) => acc + curr.seconds, 0);
-      } else if (games.size === 0) {
+      } else if (selectedGameSet.size === 0) {
         gameSet.add('Other');
         gameDurationPerDay[date]['Other'] = entries.reduce((acc, curr) => acc + curr.seconds, 0);
       }
@@ -72,6 +75,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() 
         label: game,
         backgroundColor: randomColor({ seed: game }),
         data: data.reverse(),
+        barPercentage: timePeriod === TimePeriod.DAY ? 0.2 : 0.9,
       };
     })
     .sort((a, b) => {
@@ -96,7 +100,6 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() 
       xAxes: [
         {
           stacked: true,
-          barPercentage: timePeriod === TimePeriod.DAY ? 0.2 : 0.9,
         },
       ],
       yAxes: [
@@ -134,6 +137,14 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() 
       </div>
     </>
   );
+};
+
+GameActivityBarChart.propTypes = {
+  data: PropTypes.array.isRequired,
+  timePeriod: PropTypes.number.isRequired,
+  games: PropTypes.array.isRequired,
+  height: PropTypes.number.isRequired,
+  now: PropTypes.object.isRequired,
 };
 
 export default GameActivityBarChart;

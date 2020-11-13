@@ -1,6 +1,8 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
+import PropTypes from 'prop-types';
+
 import { humanizeDurationShort } from '../utils';
 
 const GAME_ACTIVITY_LIMIT = 7;
@@ -63,6 +65,10 @@ const GameActivityPieChart = ({ data }) => {
       />
     </>
   );
+};
+
+GameActivityPieChart.propTypes = {
+  data: PropTypes.array.isRequired,
 };
 
 export default GameActivityPieChart;

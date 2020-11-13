@@ -88,7 +88,7 @@ function App() {
                 height={400}
                 data={filteredData}
                 timePeriod={timePeriod}
-                games={new Set(games)}
+                games={games}
                 now={now}
               />
             </Card>

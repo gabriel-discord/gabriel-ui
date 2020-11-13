@@ -9,6 +9,8 @@ import ActivePlaytimeChart from './components/ActivePlaytimeChart';
 import { TimePeriod } from './types';
 import { dateFormat } from './utils';
 
+import logo from './icon.png';
+
 import './App.scss';
 
 import mockData from './mock';
@@ -16,7 +18,7 @@ import mockData from './mock';
 const { Header, Content } = Layout;
 
 function App() {
-  const now = moment(); // use to mock the current date for older data
+  const now = moment('2020-11-11'); // use to mock the current date for older data
   const [searchParams, setSearchParams] = useState({
     user: null,
     timePeriod: TimePeriod.WEEK,
@@ -47,7 +49,8 @@ function App() {
   return (
     <Layout>
       <Header>
-        <h1 style={{ color: '#fafafa' }}>Gabriel</h1>
+        <img src={logo} className="logo" alt="logo" />
+        <h1 className="logo-name">GABRIEL</h1>
       </Header>
       <Content
         style={{
@@ -65,14 +68,12 @@ function App() {
         <Row>
           <Col span={12}>
             <Card style={{ height: 330 }}>
-              <h2>Games Played</h2>
               <GameActivityPieChart data={filteredData} />
             </Card>
           </Col>
           <Col span={12}>
             <Card style={{ height: 330 }}>
-              <h2>Activity Trend</h2>
-              <ActivePlaytimeChart data={filteredData} timePeriod={timePeriod} />
+              <ActivePlaytimeChart data={filteredData} timePeriod={timePeriod} games={games} />
             </Card>
           </Col>
         </Row>
@@ -83,7 +84,6 @@ function App() {
                 height: 400,
               }}
             >
-              <h2>Activity By Day</h2>
               <GameActivityBarChart
                 height={400}
                 data={filteredData}

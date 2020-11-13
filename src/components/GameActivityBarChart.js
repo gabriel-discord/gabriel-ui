@@ -3,6 +3,7 @@ import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
 import { humanizeDurationShort } from '../utils';
+import { TimePeriod } from '../types';
 import _ from 'lodash';
 
 const GAME_THRESHOLD = 5;
@@ -95,6 +96,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() 
       xAxes: [
         {
           stacked: true,
+          barPercentage: timePeriod === TimePeriod.DAY ? 0.2 : 0.9,
         },
       ],
       yAxes: [
@@ -106,6 +108,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() 
                 units: ['h'],
                 round: true,
               }),
+            display: false,
           },
         },
       ],
@@ -124,9 +127,12 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() 
 
   // chart needs to be nested in div to be responsive properly
   return (
-    <div>
-      <Bar data={barData} options={options} height={height - 100} />
-    </div>
+    <>
+      <h2>Daily Activity</h2>
+      <div>
+        <Bar data={barData} options={options} height={height - 100} />
+      </div>
+    </>
   );
 };
 

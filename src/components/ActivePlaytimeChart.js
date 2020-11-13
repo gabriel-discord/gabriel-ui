@@ -1,50 +1,97 @@
-import React from 'react';
-import { Bar } from 'react-chartjs-2';
+import React, { useState } from 'react';
+import { Radio } from 'antd';
+import { Line } from 'react-chartjs-2';
 import moment from 'moment';
+import randomColor from 'randomcolor';
 
 import { dateFormat, humanizeDurationShort } from '../utils';
 
 import { TimePeriod } from '../types';
 
-const ActivePlaytimeChart = ({ data, timePeriod }) => {
+const calculateDurationPerTimePeriod = (data, timePeriod) => {
+  const duration = timePeriod === TimePeriod.DAY ? 'hour' : 'day';
+  const durationPerHour = {};
+  const numIntervals = timePeriod === TimePeriod.DAY ? 24 : 7;
+  for (let i = 0; i < numIntervals; i++) {
+    durationPerHour[i] = 0;
+  }
+
+  data.forEach((entry) => {
+    try {
+      // entry.start: "10/9/2020, 7:05:07 PM"
+      // if duration exceeds current hour, keep counting duration for every subsequent hour
+      let currentTime = moment(entry.start, dateFormat);
+      let remainingDuration = entry.seconds;
+      while (remainingDuration > 0) {
+        const nextDuration = currentTime.clone().add(1, duration).startOf(duration);
+        const secondsTillNextDuration = nextDuration.diff(currentTime, 'seconds');
+        const durationKey =
+          timePeriod === TimePeriod.DAY
+            ? currentTime.hours() % numIntervals
+            : currentTime.days() % numIntervals;
+
+        if (remainingDuration <= secondsTillNextDuration) {
+          durationPerHour[durationKey] += remainingDuration;
+          break;
+        }
+
+        // add remaining time in hour to current hour bucket, then progress to next hour
+        durationPerHour[durationKey] += secondsTillNextDuration;
+        remainingDuration -= secondsTillNextDuration;
+        currentTime = nextDuration;
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+  });
+  return durationPerHour;
+};
+
+const ActivePlaytimeChart = ({ data, games }) => {
+  const [timePeriod, setTimePeriod] = useState(TimePeriod.DAY);
+  const [allowAnimation, setAllowAnimation] = useState(true);
+
   let chart = null;
   const baseOptions = {
     maintainAspectRatio: false,
+    animation: {
+      duration: allowAnimation ? 1000 : 0,
+    },
   };
 
-  if (timePeriod === TimePeriod.DAY) {
-    // calculate duration per hour of day
-    const durationPerHour = {};
-    for (let i = 0; i < 24; i++) {
-      durationPerHour[i] = 0;
-    }
-    data.forEach((entry) => {
-      try {
-        // entry.start: "10/9/2020, 7:05:07 PM"
-        // if duration exceeds current hour, keep counting duration for every subsequent hour
-        let currentTime = moment(entry.start, dateFormat);
-        let remainingDuration = entry.seconds;
-        while (remainingDuration > 0) {
-          const nextHour = currentTime.clone().add(1, 'hour').startOf('hour');
-          const secondsTillNextHour = nextHour.diff(currentTime, 'seconds');
-          const hourKey = currentTime.hours() % 24;
-
-          if (remainingDuration <= secondsTillNextHour) {
-            durationPerHour[hourKey] += remainingDuration;
-            break;
-          }
-
-          // add remaining time in hour to current hour bucket, then progress to next hour
-          durationPerHour[hourKey] += secondsTillNextHour;
-          remainingDuration -= secondsTillNextHour;
-          currentTime = nextHour;
-        }
-      } catch (error) {
-        console.warn(error);
-      }
+  // calculate duration per hour of day
+  let datasets;
+  if (games.length > 0) {
+    const gameDurationPerHour = {};
+    games.forEach((game) => {
+      gameDurationPerHour[game] = calculateDurationPerTimePeriod(
+        data.filter((entry) => entry.game === game),
+        timePeriod,
+      );
     });
+    datasets = Object.entries(gameDurationPerHour).map(([game, gameData]) => {
+      return {
+        label: game,
+        borderColor: randomColor({ seed: game }),
+        data: Object.values(gameData),
+        fill: false,
+      };
+    });
+  } else {
+    const durationPerHour = calculateDurationPerTimePeriod(data, timePeriod);
+    datasets = [
+      {
+        label: 'Playtime',
+        borderColor: '#95de64',
+        fill: false,
+        data: Object.values(durationPerHour),
+      },
+    ];
+  }
 
-    const labels = [];
+  let labels;
+  if (timePeriod === TimePeriod.DAY) {
+    labels = [];
     for (let i = 0; i < 24; i++) {
       if (i < 12) {
         labels.push(`${i === 0 ? 12 : i} AM`);
@@ -52,117 +99,80 @@ const ActivePlaytimeChart = ({ data, timePeriod }) => {
         labels.push(`${i % 12} PM`);
       }
     }
-
-    const barData = {
-      datasets: [
-        { label: 'Playtime', backgroundColor: '#1890ff', data: Object.values(durationPerHour) },
-      ],
-      labels,
-    };
-
-    const options = {
-      ...baseOptions,
-      scales: {
-        yAxes: [
-          {
-            ticks: {
-              callback: (value) =>
-                humanizeDurationShort(value * 1000, {
-                  units: ['h', 'm'],
-                  round: true,
-                }),
-            },
-          },
-        ],
-      },
-      tooltips: {
-        callbacks: {
-          label: (tooltipItem, data) => {
-            const { datasetIndex, index } = tooltipItem;
-            const seconds = data.datasets[datasetIndex].data[index];
-            const durationString = humanizeDurationShort(seconds * 1000, {
-              units: ['h', 'm'],
-              round: true,
-            });
-            return `${data.datasets[datasetIndex].label}:\n${durationString}`;
-          },
-        },
-      },
-    };
-    chart = <Bar data={barData} options={options} height={230} />;
   } else {
-    // calculate duration per hour of day
-    const durationPerDay = {};
-    for (let i = 0; i < 7; i++) {
-      durationPerDay[i] = 0;
-    }
-    data.forEach((entry) => {
-      try {
-        // entry.start: "10/9/2020, 7:05:07 PM"
-        // if duration exceeds current day, keep counting duration for every subsequent day
-        let currentTime = moment(entry.start, dateFormat);
-        let remainingDuration = entry.seconds;
-        while (remainingDuration > 0) {
-          const nextDay = currentTime.clone().add(1, 'day').startOf('day');
-          const secondsTillNextDay = nextDay.diff(currentTime, 'seconds');
-          const dayKey = currentTime.days() % 7;
+    labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  }
 
-          if (remainingDuration <= secondsTillNextDay) {
-            durationPerDay[dayKey] += remainingDuration;
-            break;
-          }
+  const barData = {
+    datasets,
+    labels,
+  };
 
-          // add remaining time in day to current day bucket, then progress to next day
-          durationPerDay[dayKey] += secondsTillNextDay;
-          remainingDuration -= secondsTillNextDay;
-          currentTime = nextDay;
-        }
-      } catch (error) {
-        console.warn(error);
-      }
-    });
-
-    const labels = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const barData = {
-      datasets: [
-        { label: 'Playtime', backgroundColor: '#1890ff', data: Object.values(durationPerDay) },
-      ],
-      labels,
-    };
-
-    const options = {
-      ...baseOptions,
-      scales: {
-        yAxes: [
-          {
-            ticks: {
-              callback: (value) =>
-                humanizeDurationShort(value * 1000, {
-                  units: ['d', 'h'],
-                  round: true,
-                }),
-            },
-          },
-        ],
-      },
-      tooltips: {
-        callbacks: {
-          label: (tooltipItem, data) => {
-            const { datasetIndex, index } = tooltipItem;
-            const seconds = data.datasets[datasetIndex].data[index];
-            const durationString = humanizeDurationShort(seconds * 1000, {
-              units: ['d', 'h', 'm'],
-              round: true,
-            });
-            return `${data.datasets[datasetIndex].label}:\n${durationString}`;
+  const options = {
+    ...baseOptions,
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            callback: (value) =>
+              humanizeDurationShort(value * 1000, {
+                units: timePeriod === TimePeriod.DAY ? ['h', 'm'] : ['d', 'h', 'm'],
+                round: true,
+              }),
+            min: 0,
+            display: false,
           },
         },
+      ],
+    },
+    tooltips: {
+      callbacks: {
+        label: (tooltipItem, data) => {
+          const { datasetIndex, index } = tooltipItem;
+          const seconds = data.datasets[datasetIndex].data[index];
+          const durationString = humanizeDurationShort(seconds * 1000, {
+            units: ['h', 'm'],
+            round: true,
+          });
+          return `${data.datasets[datasetIndex].label}:\n${durationString}`;
+        },
       },
-      maintainAspectRatio: false,
-    };
-    chart = <Bar data={barData} options={options} height={230} />;
-  }
-  return <div>{chart}</div>;
+    },
+  };
+  chart = <Line data={barData} options={options} height={230} />;
+
+  return (
+    <>
+      <div className="header-container">
+        <h2>Activity Trend</h2>
+        <Radio.Group
+          size="small"
+          optionType="button"
+          buttonStyle="solid"
+          value={timePeriod}
+          onChange={(e) => {
+            setAllowAnimation(false);
+            setTimePeriod(e.target.value);
+            setImmediate(() => {
+              setAllowAnimation(true);
+            });
+          }}
+          options={[
+            {
+              label: 'Hourly',
+              value: TimePeriod.DAY,
+            },
+            {
+              label: 'Weekly',
+              value: TimePeriod.WEEK,
+            },
+          ]}
+          style={{ marginLeft: 16 }}
+        />
+      </div>
+      <div>{chart}</div>
+    </>
+  );
 };
 
 export default ActivePlaytimeChart;

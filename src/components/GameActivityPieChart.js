@@ -1,7 +1,7 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
-import humanizeDuration from 'humanize-duration';
+import { humanizeDurationShort } from '../utils';
 
 const GAME_ACTIVITY_LIMIT = 7;
 
@@ -37,7 +37,7 @@ const GameActivityPieChart = ({ data }) => {
         label: (tooltipItem, data) => {
           const { datasetIndex, index } = tooltipItem;
           const seconds = data.datasets[datasetIndex].data[index];
-          return `${data.labels[index]}:\n${humanizeDuration(seconds * 1000)}`;
+          return `${data.labels[index]}:\n${humanizeDurationShort(seconds * 1000)}`;
         },
       },
     },
@@ -47,18 +47,21 @@ const GameActivityPieChart = ({ data }) => {
   };
 
   return (
-    <Doughnut
-      data={{
-        datasets: [
-          {
-            data: formattedData.map((activity) => activity.seconds),
-            backgroundColor: formattedData.map((a) => randomColor({ seed: a.game })),
-          },
-        ],
-        labels: formattedData.map((a) => a.game),
-      }}
-      options={options}
-    />
+    <>
+      <h2>Games Played</h2>
+      <Doughnut
+        data={{
+          datasets: [
+            {
+              data: formattedData.map((activity) => activity.seconds),
+              backgroundColor: formattedData.map((a) => randomColor({ seed: a.game })),
+            },
+          ],
+          labels: formattedData.map((a) => a.game),
+        }}
+        options={options}
+      />
+    </>
   );
 };
 

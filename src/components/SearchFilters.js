@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Select, Radio } from 'antd';
 import _ from 'lodash';
 
@@ -6,16 +7,16 @@ import { TimePeriod } from '../types';
 
 const aliases = {
   Acidn420: [/jesus/i],
-  alikhanx12: [/ali/i],
-  Aly: [/ally/i],
+  alikhanx12: [],
+  Aly: [],
   bobninjasub1: [/rehan/i, /re+/i],
   Gandalf: [/ian/i, /nighthank/i, /nightwing/i],
   hackerman: [/ryan/i, /rein/i],
   Ion: [/chris/i, /sirch/i],
   Janix: [/jake/i],
-  jarkyll: [/nabeel/i],
+  jarkyll: [/nabeel/i, /silver pews/i],
   lobabob: [/farhan/i, /fkd/i],
-  'Not Kevin': [/kevin/i],
+  'Not Kevin': [],
   solewolf: [/kitkat/i, /keith/i, /kit/i],
 };
 
@@ -99,6 +100,12 @@ const SearchFilters = ({ data, onChange, value }) => {
       </Select>
     </div>
   );
+};
+
+SearchFilters.propTypes = {
+  data: PropTypes.array.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.object.isRequired,
 };
 
 export default SearchFilters;

@@ -6,6 +6,7 @@ import SearchFilters from './components/SearchFilters';
 import GameActivityPieChart from './components/GameActivityPieChart';
 import GameActivityBarChart from './components/GameActivityBarChart';
 import ActivePlaytimeChart from './components/ActivePlaytimeChart';
+import GameDetails from './components/GameDetails';
 import { TimePeriod } from './types';
 import { dateFormat } from './utils';
 
@@ -94,6 +95,23 @@ function App() {
             </Card>
           </Col>
         </Row>
+        {games.length > 0 && (
+          <Row>
+            {games.map((game) => {
+              const gameData = filteredData.filter((entry) => entry.game === game);
+              if (gameData.length === 0) {
+                return null;
+              }
+              return (
+                <Col span={12} key={game}>
+                  <Card>
+                    <GameDetails data={gameData} timePeriod={timePeriod} game={game} />
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
+        )}
       </Content>
     </Layout>
   );

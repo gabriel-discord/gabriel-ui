@@ -1,7 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Doughnut } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
-import PropTypes from 'prop-types';
 
 import { humanizeDurationShort } from '../utils';
 

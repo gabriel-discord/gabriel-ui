@@ -32,3 +32,9 @@
 h2 {
   user-select: none;
 }
+
+.game-details-header {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

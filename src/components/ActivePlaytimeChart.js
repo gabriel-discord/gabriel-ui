@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Radio } from 'antd';
+import { Radio, Tooltip } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Line } from 'react-chartjs-2';
 import moment from 'moment';
 import randomColor from 'randomcolor';
@@ -98,7 +99,7 @@ const ActivePlaytimeChart = ({ data, games }) => {
       if (i < 12) {
         labels.push(`${i === 0 ? 12 : i} AM`);
       } else {
-        labels.push(`${i % 12} PM`);
+        labels.push(`${i > 12 ? i % 12 : i} PM`);
       }
     }
   } else {
@@ -137,6 +138,9 @@ const ActivePlaytimeChart = ({ data, games }) => {
     <>
       <div className="header-container">
         <h2>Activity Trend</h2>
+        <Tooltip title="Most popular time a game is played">
+          <QuestionCircleOutlined className="tooltip-icon" />
+        </Tooltip>
         <Radio.Group
           size="small"
           optionType="button"
@@ -151,15 +155,15 @@ const ActivePlaytimeChart = ({ data, games }) => {
           }}
           options={[
             {
-              label: 'Hourly',
+              label: 'Per Hour',
               value: TimePeriod.DAY,
             },
             {
-              label: 'Weekly',
+              label: 'Per Day',
               value: TimePeriod.WEEK,
             },
           ]}
-          style={{ marginLeft: 16 }}
+          style={{ marginLeft: 'auto' }}
         />
       </div>
       <div>{chart}</div>

@@ -12,16 +12,6 @@ on:
       - .prettierrc*
       - '**.md'
 
-  # Run tests for any PRs merging into main
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - .gitignore
-      - .eslintrc*
-      - .prettierrc*
-      - '**.md'
-
 env:
   IMAGE_NAME: gabriel-ui
 
@@ -107,7 +97,6 @@ jobs:
     if: always()
     needs:
       - build-images
-      - test
       - deploy
     steps:
       - uses: geekyeggo/delete-artifact@v1

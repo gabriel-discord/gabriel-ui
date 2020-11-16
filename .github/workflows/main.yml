@@ -1,0 +1,116 @@
+# Docs: https://docs.github.com/en/actions/reference
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - .gitignore
+      - .eslintrc*
+      - .prettierrc*
+      - '**.md'
+
+  # Run tests for any PRs merging into main
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - .gitignore
+      - .eslintrc*
+      - .prettierrc*
+      - '**.md'
+
+env:
+  IMAGE_NAME: gabriel-ui
+
+jobs:
+  # IMPORTANT: If image tarballs are renamed, make sure they're correctly ignored in .dockerignore
+  build-images:
+    name: Build Docker images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Cache build
+        id: cache-build
+        uses: actions/cache@v2
+        with:
+          path: ./image-build.tar
+          key: Dockerfile[${{ hashFiles('./Dockerfile') }}]-Lockfile[${{ hashFiles('./package-lock.json') }}]-image-build
+
+      - name: Install dependencie and build
+        if: steps.cache-build.outputs.cache-hit != 'true'
+        run: |
+          docker build --target build -t $IMAGE_NAME:build .
+          docker save $IMAGE_NAME:build > image-build.tar
+
+      - name: Load build
+        if: steps.cache-build.outputs.cache-hit == 'true'
+        run: docker load -i image-build.tar
+
+      - name: Build release image
+        if: github.event_name == 'push'
+        run: |
+          docker build --cache-from $IMAGE_NAME:build --cache-from $IMAGE_NAME:base \
+            --target release -t $IMAGE_NAME:${GITHUB_SHA::8} .
+          docker save $IMAGE_NAME:${GITHUB_SHA::8} > image-release.tar
+
+      - name: Upload release image
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v2
+        with:
+          name: image-release-${{ github.sha }}
+          path: ./image-release.tar
+
+  # Push image to GitHub Packages.
+  deploy:
+    name: Deploy
+    needs: build-images
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get release image
+        uses: actions/download-artifact@v2
+        with:
+          name: image-release-${{ github.sha }}
+
+      - name: Deploy docker image
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add <(echo "${{ secrets.DEPLOY_KEY }}")
+          mkdir -p ~/.ssh
+          echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+          rsync --chmod=664 --groupmap=*:deploy -ztgve ssh docker-compose.deploy.yml \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_DOMAIN }}:/srv/shared/gabriel-ui/
+
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_DOMAIN }} docker load < image-release.tar
+
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_DOMAIN }} << EOF
+            export IMAGE_NAME="$IMAGE_NAME" IMAGE_TAG="${GITHUB_SHA::8}"
+
+            docker tag \$IMAGE_NAME:\$IMAGE_TAG \$IMAGE_NAME:latest
+
+            cd /srv/shared/gabriel-ui
+            docker-compose -f docker-compose.deploy.yml down
+            docker-compose -f docker-compose.deploy.yml up -d
+          EOF
+
+  cleanup:
+    name: Remove build artifacts
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - build-images
+      - test
+      - deploy
+    steps:
+      - uses: geekyeggo/delete-artifact@v1
+        with:
+          name: |
+            image-release-${{ github.sha }}

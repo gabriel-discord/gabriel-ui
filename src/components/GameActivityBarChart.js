@@ -10,7 +10,7 @@ import _ from 'lodash';
 
 const GAME_THRESHOLD = 5;
 
-const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() }) => {
+const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment(), isMobile }) => {
   const selectedGameSet = new Set(games);
   // calculate duration in seconds for each game
   const durationPerGame = {};
@@ -124,6 +124,10 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment() 
           return `${data.datasets[datasetIndex].label}:\n${humanizeDurationShort(seconds * 1000)}`;
         },
       },
+    },
+    legend: {
+      align: isMobile ? 'start' : 'center',
+      position: isMobile ? 'bottom' : 'top',
     },
     maintainAspectRatio: false,
   };

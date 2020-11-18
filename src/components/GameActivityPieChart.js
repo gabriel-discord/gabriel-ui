@@ -7,7 +7,7 @@ import { humanizeDurationShort } from '../utils';
 
 const GAME_ACTIVITY_LIMIT = 7;
 
-const GameActivityPieChart = ({ data, height }) => {
+const GameActivityPieChart = ({ data, height, isMobile }) => {
   const activityPerGame = {};
 
   data.forEach(({ game, seconds }) => {
@@ -44,7 +44,8 @@ const GameActivityPieChart = ({ data, height }) => {
       },
     },
     legend: {
-      position: 'right',
+      position: isMobile ? 'bottom' : 'right',
+      align: isMobile ? 'start' : 'center',
     },
     maintainAspectRatio: false,
   };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card, Row, Col, Layout } from 'antd';
 import moment from 'moment';
+import { useMediaQuery } from 'react-responsive';
 
 import SearchFilters from './components/SearchFilters';
 import GameActivityPieChart from './components/GameActivityPieChart';
@@ -47,6 +48,10 @@ function App() {
     });
   }
 
+  const isMobile = useMediaQuery({ query: '(max-width: 550px)' });
+
+  const doughnutCardHeight = isMobile ? 450 : 330;
+
   return (
     <Layout>
       <Header>
@@ -68,8 +73,12 @@ function App() {
         />
         <Row>
           <Col xs={24} md={12}>
-            <Card style={{ height: 330 }}>
-              <GameActivityPieChart data={filteredData} height={330} />
+            <Card style={{ height: doughnutCardHeight }}>
+              <GameActivityPieChart
+                data={filteredData}
+                height={doughnutCardHeight}
+                isMobile={isMobile}
+              />
             </Card>
           </Col>
           <Col xs={24} md={12}>
@@ -80,17 +89,14 @@ function App() {
         </Row>
         <Row>
           <Col span={24}>
-            <Card
-              style={{
-                height: 400,
-              }}
-            >
+            <Card>
               <GameActivityBarChart
-                height={400}
+                height={isMobile ? 450 : 400}
                 data={filteredData}
                 timePeriod={timePeriod}
                 games={games}
                 now={now}
+                isMobile={isMobile}
               />
             </Card>
           </Col>
@@ -105,7 +111,12 @@ function App() {
               return (
                 <Col xs={24} md={12} key={game}>
                   <Card>
-                    <GameDetails data={gameData} timePeriod={timePeriod} game={game} />
+                    <GameDetails
+                      data={gameData}
+                      timePeriod={timePeriod}
+                      game={game}
+                      isMobile={isMobile}
+                    />
                   </Card>
                 </Col>
               );

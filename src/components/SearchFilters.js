@@ -39,7 +39,7 @@ const SearchFilters = ({ data, onChange, value }) => {
     <div className="search-filters">
       <Select
         placeholder="Select a user..."
-        style={{ width: 300, marginRight: 16, marginBottom: 16 }}
+        style={{ width: 300, maxWidth: '100%', marginRight: 16, marginBottom: 16 }}
         value={value.user}
         onChange={(user) => onChange({ ...value, user })}
         allowClear

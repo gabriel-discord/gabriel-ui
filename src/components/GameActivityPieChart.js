@@ -7,7 +7,7 @@ import { humanizeDurationShort } from '../utils';
 
 const GAME_ACTIVITY_LIMIT = 7;
 
-const GameActivityPieChart = ({ data }) => {
+const GameActivityPieChart = ({ data, height }) => {
   const activityPerGame = {};
 
   data.forEach(({ game, seconds }) => {
@@ -46,23 +46,27 @@ const GameActivityPieChart = ({ data }) => {
     legend: {
       position: 'right',
     },
+    maintainAspectRatio: false,
   };
 
   return (
     <>
       <h2>Games Played</h2>
-      <Doughnut
-        data={{
-          datasets: [
-            {
-              data: formattedData.map((activity) => activity.seconds),
-              backgroundColor: formattedData.map((a) => randomColor({ seed: a.game })),
-            },
-          ],
-          labels: formattedData.map((a) => a.game),
-        }}
-        options={options}
-      />
+      <div>
+        <Doughnut
+          data={{
+            datasets: [
+              {
+                data: formattedData.map((activity) => activity.seconds),
+                backgroundColor: formattedData.map((a) => randomColor({ seed: a.game })),
+              },
+            ],
+            labels: formattedData.map((a) => a.game),
+          }}
+          options={options}
+          height={height - 100}
+        />
+      </div>
     </>
   );
 };

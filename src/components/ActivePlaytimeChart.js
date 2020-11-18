@@ -137,7 +137,7 @@ const ActivePlaytimeChart = ({ data, games }) => {
   return (
     <>
       <div className="header-container">
-        <h2>Activity Trend</h2>
+        <h2>Trend</h2>
         <Tooltip title="Most popular time a game is played">
           <QuestionCircleOutlined className="tooltip-icon" />
         </Tooltip>

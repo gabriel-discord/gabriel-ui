@@ -39,7 +39,7 @@ const SearchFilters = ({ data, onChange, value }) => {
     <div className="search-filters">
       <Select
         placeholder="Select a user..."
-        style={{ width: 300, marginBottom: 16 }}
+        style={{ width: 300, marginRight: 16, marginBottom: 16 }}
         value={value.user}
         onChange={(user) => onChange({ ...value, user })}
         allowClear
@@ -86,13 +86,13 @@ const SearchFilters = ({ data, onChange, value }) => {
             value: TimePeriod.FOREVER,
           },
         ]}
-        style={{ marginLeft: 16 }}
+        style={{ marginBottom: 16 }}
       />
       <Select
         mode="multiple"
         allowClear
         placeholder="Compare games..."
-        style={{ width: 648, display: 'block', marginBottom: 16 }}
+        style={{ width: '100%', display: 'block', marginBottom: 16 }}
         value={value.games}
         onChange={(games) => onChange({ ...value, games })}
       >

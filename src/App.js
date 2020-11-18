@@ -67,12 +67,12 @@ function App() {
           onChange={(searchParams) => setSearchParams(searchParams)}
         />
         <Row>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Card style={{ height: 330 }}>
-              <GameActivityPieChart data={filteredData} />
+              <GameActivityPieChart data={filteredData} height={330} />
             </Card>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Card style={{ height: 330 }}>
               <ActivePlaytimeChart data={filteredData} timePeriod={timePeriod} games={games} />
             </Card>
@@ -103,7 +103,7 @@ function App() {
                 return null;
               }
               return (
-                <Col span={12} key={game}>
+                <Col xs={24} md={12} key={game}>
                   <Card>
                     <GameDetails data={gameData} timePeriod={timePeriod} game={game} />
                   </Card>

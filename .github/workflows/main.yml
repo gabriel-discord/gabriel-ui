@@ -29,9 +29,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./image-build.tar
-          key: Dockerfile[${{ hashFiles('./Dockerfile') }}]-Lockfile[${{ hashFiles('./package-lock.json') }}]-image-build
+          key: ${{ hashFiles('./Dockerfile') }}-${{ hashFiles('./package-lock.json') }}
 
-      - name: Install dependencie and build
+      - name: Install dependencies and build
         if: steps.cache-build.outputs.cache-hit != 'true'
         run: |
           docker build --target build -t $IMAGE_NAME:build .

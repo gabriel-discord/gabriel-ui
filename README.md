@@ -1,3 +1,5 @@
+![CI/CD Pipeline](https://github.com/gabriel-discord/gabriel-ui/workflows/CI/CD%20Pipeline/badge.svg)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

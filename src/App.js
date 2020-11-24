@@ -26,9 +26,9 @@ function App() {
     timePeriod: TimePeriod.WEEK,
     games: [],
   });
-  const { data } = useSWR('http://donchaknow.xyz/jank.json', async () => {
+  const { data } = useSWR('https://donchaknow.xyz/jank.json', async () => {
     try {
-      const response = await axios.get('http://donchaknow.xyz/jank.json');
+      const response = await axios.get('https://donchaknow.xyz/jank.json');
       return response.data;
     } catch (error) {
       return [];

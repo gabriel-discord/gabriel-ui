@@ -61,7 +61,7 @@ const GameActivityPieChart = ({ data, height, isMobile }) => {
   return (
     <>
       <h2>Games Played</h2>
-      <div>
+      <div style={{ height: height - 100 }}>
         <Doughnut
           data={{
             datasets: [
@@ -73,7 +73,6 @@ const GameActivityPieChart = ({ data, height, isMobile }) => {
             labels: formattedData.map((a) => _.truncate(a.game, { length: 30 })),
           }}
           options={options}
-          height={height - 100}
         />
       </div>
     </>

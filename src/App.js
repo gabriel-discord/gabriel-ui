@@ -57,6 +57,7 @@ function App() {
   const isMobile = useMediaQuery({ query: '(max-width: 550px)' });
 
   const doughnutCardHeight = isMobile ? 450 : 330;
+  const trendCardHeight = 330;
 
   return (
     <Layout>
@@ -89,7 +90,7 @@ function App() {
               </Card>
             </Col>
             <Col xs={24} md={12}>
-              <Card style={{ height: 330 }}>
+              <Card style={{ height: trendCardHeight }}>
                 <TrendChart data={filteredData} timePeriod={timePeriod} games={games} />
               </Card>
             </Col>

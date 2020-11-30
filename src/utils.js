@@ -21,13 +21,6 @@ export const humanizeDurationShort = humanizeDuration.humanizer({
   delimiter: ' ',
 });
 
-export const DiscordStatus = Object.freeze({
-  ACTIVE: 'ACTIVE',
-  IDLE: 'IDLE',
-  OFFLINE: 'OFFLINE',
-  DO_NOT_DISTURB: 'DO_NOT_DISTURB',
-});
-
 const getDiscordStatus = (statusNum) => {
   const statusMap = {
     0: 'ACTIVE',

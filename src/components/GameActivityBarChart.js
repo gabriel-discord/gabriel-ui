@@ -50,7 +50,6 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
   Object.entries(entriesPerDay).forEach(([date, dataArr]) => {
     gameDurationPerDay[date] = {};
     const entriesByGame = _.groupBy(dataArr, (entry) => entry.game);
-    console.log('entriesByGame = ', entriesByGame);
     // group duration by milliseconds per game
     Object.entries(entriesByGame).forEach(([game, entries]) => {
       if (topGames.has(game) || selectedGameSet.size > 0) {

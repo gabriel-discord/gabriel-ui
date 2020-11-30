@@ -168,8 +168,8 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
 
   let adjustedHeight = height - 100;
   if (showAllGames) {
-    const gamesPerLine = isMobile ? 1 : 5;
-    adjustedHeight += Math.floor(gameSet.size / gamesPerLine) * 16;
+    const gamesPerLine = isMobile ? 1 : 5.5;
+    adjustedHeight += Math.floor(gameSet.size / gamesPerLine) * 18;
   }
 
   // chart needs to be nested in div to be responsive properly

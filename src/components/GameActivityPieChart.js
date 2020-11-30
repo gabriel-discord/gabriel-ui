@@ -5,7 +5,7 @@ import randomColor from 'randomcolor';
 
 import { humanizeDurationShort } from '../utils';
 
-const GAME_ACTIVITY_LIMIT = 7;
+const GAME_ACTIVITY_LIMIT = 8;
 
 const GameActivityPieChart = ({ data, height, isMobile }) => {
   const activityPerGame = {};

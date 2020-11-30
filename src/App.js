@@ -36,7 +36,7 @@ function App() {
 
   const { games, timePeriod, userId } = searchParams;
 
-  let filteredData = userId ? (data || []).filter((entry) => userId === entry.userId) : data || [];
+  let filteredData = userId ? (data || []).filter((entry) => userId === entry.user.id) : data || [];
 
   if (timePeriod !== TimePeriod.FOREVER) {
     const cutoffDate = moment().subtract(timePeriod, 'days');

@@ -12,10 +12,10 @@ const GameActivityPieChart = ({ data, height, isMobile }) => {
   const activityPerGame = {};
 
   let totalDuration = 0;
-  data.forEach(({ game, duration }) => {
+  data.forEach(({ game, activeDuration }) => {
     activityPerGame[game] = activityPerGame[game] || 0;
-    activityPerGame[game] += duration;
-    totalDuration += duration;
+    activityPerGame[game] += activeDuration;
+    totalDuration += activeDuration;
   });
 
   const gameActivityData = Object.entries(activityPerGame)

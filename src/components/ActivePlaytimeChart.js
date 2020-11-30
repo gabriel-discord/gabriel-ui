@@ -23,7 +23,7 @@ const calculateDurationPerTimePeriod = (data, timePeriod) => {
     try {
       // if duration exceeds current hour, keep counting duration for every subsequent hour
       let currentTime = moment(entry.start);
-      let remainingDuration = entry.duration;
+      let remainingDuration = entry.activeDuration;
       while (remainingDuration > 0) {
         const nextDuration = currentTime.clone().add(1, duration).startOf(duration);
         const msTillNextDuration = nextDuration.diff(currentTime, 'milliseconds');

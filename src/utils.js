@@ -1,6 +1,8 @@
 import moment from 'moment';
 import humanizeDuration from 'humanize-duration';
 
+import { DiscordStatus } from './types';
+
 export const dateFormat = 'MM/D/YYYY, hh:mm:ss A';
 
 export const humanizeDurationShort = humanizeDuration.humanizer({
@@ -23,10 +25,10 @@ export const humanizeDurationShort = humanizeDuration.humanizer({
 
 const getDiscordStatus = (statusNum) => {
   const statusMap = {
-    0: 'ACTIVE',
-    1: 'IDLE',
-    2: 'OFFLINE',
-    3: 'DO_NOT_DISTURB',
+    0: DiscordStatus.ACTIVE,
+    1: DiscordStatus.IDLE,
+    2: DiscordStatus.OFFLINE,
+    3: DiscordStatus.DO_NOT_DISTURB,
   };
 
   return statusMap[statusNum] ?? statusNum;
@@ -40,7 +42,7 @@ export const formatData = (data) => {
     let prevStatus = getDiscordStatus(rawStatusLog[0]);
     let runningStatus = {
       status: prevStatus,
-      duration: 1,
+      duration: 60 * 1000,
     };
     for (let i = 1; i < rawStatusLog.length; i++) {
       const currStatus = getDiscordStatus(rawStatusLog[i]);
@@ -49,10 +51,10 @@ export const formatData = (data) => {
         statusLog.push(runningStatus);
         runningStatus = {
           status: currStatus,
-          duration: 1,
+          duration: 60 * 1000,
         };
       } else {
-        runningStatus.duration++;
+        runningStatus.duration += 60 * 1000;
       }
 
       if (i === rawStatusLog.length - 1) {
@@ -63,6 +65,16 @@ export const formatData = (data) => {
     const start = parseInt(moment(entry.start, dateFormat).format('x'));
     const stop = parseInt(moment(entry.stop, dateFormat).format('x'));
 
+    const duration = stop - start;
+    let activeDuration;
+    if ((rawStatusLog ?? []).length > 0) {
+      activeDuration = statusLog
+        .filter((entry) => entry.status === DiscordStatus.ACTIVE)
+        .reduce((acc, curr) => acc + curr.duration, 0);
+    } else {
+      activeDuration = duration;
+    }
+
     return {
       game: entry.game,
       user: {
@@ -72,7 +84,9 @@ export const formatData = (data) => {
       },
       start,
       stop,
-      duration: stop - start,
+      duration,
+      activeDuration,
+      idleDuration: duration - activeDuration,
       statusLog,
     };
   });

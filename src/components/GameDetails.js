@@ -9,24 +9,24 @@ const GameDetails = ({ data, game }) => {
   const durationPerUser = {};
 
   data.forEach((entry) => {
-    durationPerUser[entry.user] = durationPerUser[entry.user] ?? 0;
-    durationPerUser[entry.user] += entry.seconds;
+    durationPerUser[entry.user.id] = durationPerUser[entry.user.id] ?? 0;
+    durationPerUser[entry.user.id] += entry.activeDuration;
   });
 
   const formattedData = Object.entries(durationPerUser)
-    .map(([user, seconds]) => ({
+    .map(([user, duration]) => ({
       user,
-      seconds,
+      duration,
     }))
-    .sort((a, b) => b.seconds - a.seconds);
+    .sort((a, b) => b.duration - a.duration);
 
   const options = {
     tooltips: {
       callbacks: {
         label: (tooltipItem, data) => {
           const { datasetIndex, index } = tooltipItem;
-          const seconds = data.datasets[datasetIndex].data[index];
-          return `${data.labels[index]}:\n${humanizeDurationShort(seconds * 1000)}`;
+          const duration = data.datasets[datasetIndex].data[index];
+          return `${data.labels[index]}:\n${humanizeDurationShort(duration)}`;
         },
       },
     },
@@ -42,7 +42,7 @@ const GameDetails = ({ data, game }) => {
         data={{
           datasets: [
             {
-              data: formattedData.map((entry) => entry.seconds),
+              data: formattedData.map((entry) => entry.duration),
               backgroundColor: formattedData.map((a) => randomColor({ seed: a.user })),
             },
           ],

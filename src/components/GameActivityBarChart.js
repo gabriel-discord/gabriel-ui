@@ -3,7 +3,6 @@ import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { getDurationInDay, humanizeDurationShort } from '../utils';
 import { TimePeriod } from '../types';
@@ -14,9 +13,9 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
   const selectedGameSet = new Set(games);
   // calculate duration in milliseconds for each game
   const durationPerGame = {};
-  data.forEach(({ game, duration }) => {
+  data.forEach(({ game, activeDuration }) => {
     durationPerGame[game] = durationPerGame[game] ?? 0;
-    durationPerGame[game] += duration;
+    durationPerGame[game] += activeDuration;
   });
 
   // calculate top N games to display based on duration
@@ -54,8 +53,8 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
       // handle adding playtime across multiple days if users plays before and after midnight
       const addEntriesForGame = (game) => {
         gameSet.add(game);
-        entries.forEach(({ duration, start }) => {
-          let remainingDuration = duration;
+        entries.forEach(({ activeDuration, start }) => {
+          let remainingDuration = activeDuration;
           const currentDate = moment(start).clone();
           while (remainingDuration > 0) {
             const durationForDay = getDurationInDay(remainingDuration, currentDate);

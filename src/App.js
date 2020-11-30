@@ -98,7 +98,7 @@ function App() {
             <Col span={24}>
               <Card>
                 <GameActivityBarChart
-                  height={isMobile ? 450 : 400}
+                  height={isMobile ? 600 : 400}
                   data={filteredData}
                   timePeriod={timePeriod}
                   games={games}

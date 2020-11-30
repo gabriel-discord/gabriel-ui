@@ -110,7 +110,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
   const labels = [];
   const date = moment();
   for (let i = 0; i < numDaysToGoBack; i++) {
-    labels.push(date.format('MM/DD'));
+    labels.push(date.format('MM/DD ddd'));
     date.subtract(1, 'day');
   }
   labels.reverse();

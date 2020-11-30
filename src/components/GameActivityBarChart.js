@@ -8,9 +8,9 @@ import { humanizeDurationShort } from '../utils';
 import { TimePeriod } from '../types';
 import _ from 'lodash';
 
-const GAME_THRESHOLD = 5;
-
 const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => {
+  const GAME_THRESHOLD =
+    timePeriod === TimePeriod.FOREVER || timePeriod === TimePeriod.MONTH ? 10 : 5;
   const selectedGameSet = new Set(games);
   // calculate duration in milliseconds for each game
   const durationPerGame = {};
@@ -30,12 +30,16 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
 
   // group each entry by date
   const entriesPerDay = {};
+  let earliestDate = moment();
   data.forEach((entry) => {
     const { start } = entry;
-    const startDate = moment(start).startOf('day').format();
-    if (startDate) {
-      entriesPerDay[startDate] = entriesPerDay[startDate] ?? [];
-      entriesPerDay[startDate].push(entry);
+    const startDate = moment(start).startOf('day');
+    const startDateString = startDate.format();
+    entriesPerDay[startDateString] = entriesPerDay[startDateString] ?? [];
+    entriesPerDay[startDateString].push(entry);
+
+    if (startDate.isBefore(earliestDate)) {
+      earliestDate = startDate;
     }
   });
 
@@ -45,27 +49,34 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
   // for each day, look at all entries
   Object.entries(entriesPerDay).forEach(([date, dataArr]) => {
     gameDurationPerDay[date] = {};
-    const gameGroup = _.groupBy(dataArr, (entry) => entry.game);
+    const entriesByGame = _.groupBy(dataArr, (entry) => entry.game);
+    console.log('entriesByGame = ', entriesByGame);
     // group duration by milliseconds per game
-    Object.entries(gameGroup).forEach(([game, entries]) => {
+    Object.entries(entriesByGame).forEach(([game, entries]) => {
       if (topGames.has(game) || selectedGameSet.size > 0) {
         gameSet.add(game);
         gameDurationPerDay[date][game] = entries.reduce((acc, curr) => acc + curr.duration, 0);
       } else if (selectedGameSet.size === 0) {
         gameSet.add('Other');
-        gameDurationPerDay[date]['Other'] = entries.reduce((acc, curr) => acc + curr.duration, 0);
+        gameDurationPerDay[date]['Other'] = gameDurationPerDay[date]['Other'] ?? 0;
+        gameDurationPerDay[date]['Other'] += entries.reduce((acc, curr) => acc + curr.duration, 0);
       }
     });
   });
 
   // limit to displaying the last 30 days if time period is ALL
-  const numIterations = Math.min(timePeriod, 30);
+  let numDaysToGoBack;
+  if (timePeriod === TimePeriod.FOREVER) {
+    numDaysToGoBack = moment().diff(earliestDate, 'days');
+  } else {
+    numDaysToGoBack = timePeriod;
+  }
 
   const datasets = Array.from(gameSet)
     .map((game) => {
       const date = moment().startOf('day');
       const data = [];
-      for (let i = 0; i < numIterations; i++) {
+      for (let i = 0; i < numDaysToGoBack; i++) {
         const dateString = date.format();
         const duration = gameDurationPerDay[dateString]?.[game] ?? 0;
         data.push(duration);
@@ -85,7 +96,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
 
   const labels = [];
   const date = moment();
-  for (let i = 0; i < numIterations; i++) {
+  for (let i = 0; i < numDaysToGoBack; i++) {
     labels.push(date.format('MM/DD'));
     date.subtract(1, 'day');
   }

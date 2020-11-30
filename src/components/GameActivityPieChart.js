@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Doughnut } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
+import _ from 'lodash';
 
 import { humanizeDurationShort } from '../utils';
 
@@ -69,7 +70,7 @@ const GameActivityPieChart = ({ data, height, isMobile }) => {
                 backgroundColor: formattedData.map((a) => randomColor({ seed: a.game })),
               },
             ],
-            labels: formattedData.map((a) => a.game),
+            labels: formattedData.map((a) => _.truncate(a.game, { length: 30 })),
           }}
           options={options}
           height={height - 100}

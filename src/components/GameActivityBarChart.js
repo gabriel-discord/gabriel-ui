@@ -3,6 +3,7 @@ import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import { getDurationInDay, humanizeDurationShort } from '../utils';
 import { TimePeriod } from '../types';
@@ -95,7 +96,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
         date.subtract(1, 'days');
       }
       return {
-        label: game,
+        label: _.truncate(game, { length: 30 }),
         backgroundColor: randomColor({ seed: game }),
         data: data.reverse(),
         // prevent bar from taking up full width if showing single day

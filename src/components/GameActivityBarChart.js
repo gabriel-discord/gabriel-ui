@@ -4,7 +4,7 @@ import { Bar } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
 import PropTypes from 'prop-types';
 
-import { humanizeDurationShort } from '../utils';
+import { getDurationInDay, humanizeDurationShort } from '../utils';
 import { TimePeriod } from '../types';
 import _ from 'lodash';
 
@@ -48,17 +48,31 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
   const gameSet = new Set();
   // for each day, look at all entries
   Object.entries(entriesPerDay).forEach(([date, dataArr]) => {
-    gameDurationPerDay[date] = {};
     const entriesByGame = _.groupBy(dataArr, (entry) => entry.game);
     // group duration by milliseconds per game
     Object.entries(entriesByGame).forEach(([game, entries]) => {
-      if (topGames.has(game) || selectedGameSet.size > 0) {
+      // handle adding playtime across multiple days if users plays before and after midnight
+      const addEntriesForGame = (game) => {
         gameSet.add(game);
-        gameDurationPerDay[date][game] = entries.reduce((acc, curr) => acc + curr.duration, 0);
+        entries.forEach(({ duration, start }) => {
+          let remainingDuration = duration;
+          const currentDate = moment(start).clone();
+          while (remainingDuration > 0) {
+            const durationForDay = getDurationInDay(remainingDuration, currentDate);
+            const dateString = currentDate.clone().startOf('day').format();
+            gameDurationPerDay[dateString] = gameDurationPerDay[dateString] ?? {};
+            gameDurationPerDay[dateString][game] = gameDurationPerDay[dateString][game] ?? 0;
+            gameDurationPerDay[dateString][game] += durationForDay;
+            remainingDuration -= durationForDay;
+            currentDate.add(1, 'day').startOf('day');
+          }
+        });
+      };
+
+      if (topGames.has(game) || selectedGameSet.size > 0) {
+        addEntriesForGame(game);
       } else if (selectedGameSet.size === 0) {
-        gameSet.add('Other');
-        gameDurationPerDay[date]['Other'] = gameDurationPerDay[date]['Other'] ?? 0;
-        gameDurationPerDay[date]['Other'] += entries.reduce((acc, curr) => acc + curr.duration, 0);
+        addEntriesForGame('Other');
       }
     });
   });
@@ -131,7 +145,11 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
         label: (tooltipItem, data) => {
           const { datasetIndex, index } = tooltipItem;
           const duration = data.datasets[datasetIndex].data[index];
-          return `${data.datasets[datasetIndex].label}:\n${humanizeDurationShort(duration)}`;
+          const durationString = humanizeDurationShort(duration, {
+            units: ['h', 'm'],
+            round: true,
+          });
+          return `${data.datasets[datasetIndex].label}:\n${durationString}`;
         },
       },
     },

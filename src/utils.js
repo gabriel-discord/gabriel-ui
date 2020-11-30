@@ -77,3 +77,9 @@ export const formatData = (data) => {
     };
   });
 };
+
+export const getDurationInDay = (duration, start) => {
+  const endOfDay = start.clone().endOf('day');
+  const remainingTimeInDay = endOfDay.diff(start, 'milliseconds');
+  return Math.min(duration, remainingTimeInDay);
+};

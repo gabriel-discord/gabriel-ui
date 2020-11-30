@@ -1,3 +1,4 @@
+import moment from 'moment';
 import humanizeDuration from 'humanize-duration';
 
 export const dateFormat = 'MM/D/YYYY, hh:mm:ss A';
@@ -19,3 +20,68 @@ export const humanizeDurationShort = humanizeDuration.humanizer({
   spacer: '',
   delimiter: ' ',
 });
+
+export const DiscordStatus = Object.freeze({
+  ACTIVE: 'ACTIVE',
+  IDLE: 'IDLE',
+  OFFLINE: 'OFFLINE',
+  DO_NOT_DISTURB: 'DO_NOT_DISTURB',
+});
+
+const getDiscordStatus = (statusNum) => {
+  const statusMap = {
+    0: 'ACTIVE',
+    1: 'IDLE',
+    2: 'OFFLINE',
+    3: 'DO_NOT_DISTURB',
+  };
+
+  return statusMap[statusNum] ?? statusNum;
+};
+
+export const formatData = (data) => {
+  return data.map((entry) => {
+    const rawStatusLog = entry.statusLog ?? [];
+    const statusLog = [];
+
+    let prevStatus = getDiscordStatus(rawStatusLog[0]);
+    let runningStatus = {
+      status: prevStatus,
+      duration: 1,
+    };
+    for (let i = 1; i < rawStatusLog.length; i++) {
+      const currStatus = getDiscordStatus(rawStatusLog[i]);
+      if (prevStatus !== currStatus) {
+        prevStatus = currStatus;
+        statusLog.push(runningStatus);
+        runningStatus = {
+          status: currStatus,
+          duration: 1,
+        };
+      } else {
+        runningStatus.duration++;
+      }
+
+      if (i === rawStatusLog.length - 1) {
+        statusLog.push(runningStatus);
+      }
+    }
+
+    const start = parseInt(moment(entry.start, dateFormat).format('x'));
+    const stop = parseInt(moment(entry.stop, dateFormat).format('x'));
+
+    return {
+      game: entry.game,
+      user: {
+        id: entry.user,
+        aliases: [entry.user],
+        tag: entry.user,
+      },
+      userId: entry.user,
+      start,
+      stop,
+      duration: stop - start,
+      statusLog,
+    };
+  });
+};

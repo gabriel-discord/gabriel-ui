@@ -21,7 +21,7 @@ const aliases = {
 };
 
 const SearchFilters = ({ data, onChange, value }) => {
-  const users = _.uniq(data.map(({ user }) => user)).sort((a, b) => a.localeCompare(b));
+  const users = _.uniq(data.map(({ user }) => user.id)).sort((a, b) => a.localeCompare(b));
   const gameSet = new Set(data.map((entry) => entry.game));
   const gameOptions = Array.from(gameSet)
     .map((game) => ({
@@ -40,8 +40,8 @@ const SearchFilters = ({ data, onChange, value }) => {
       <Select
         placeholder="Select a user..."
         style={{ width: 300, maxWidth: '100%', marginRight: 16, marginBottom: 16 }}
-        value={value.user}
-        onChange={(user) => onChange({ ...value, user })}
+        value={value.userId}
+        onChange={(userId) => onChange({ ...value, userId })}
         allowClear
         showSearch
         filterOption={(input, option) => {

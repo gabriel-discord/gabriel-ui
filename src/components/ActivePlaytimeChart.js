@@ -7,7 +7,7 @@ import randomColor from 'randomcolor';
 import PropTypes from 'prop-types';
 import normalize from 'array-normalize';
 
-import { dateFormat, humanizeDurationShort } from '../utils';
+import { humanizeDurationShort } from '../utils';
 
 import { TimePeriod } from '../types';
 
@@ -21,26 +21,25 @@ const calculateDurationPerTimePeriod = (data, timePeriod) => {
 
   data.forEach((entry) => {
     try {
-      // entry.start: "10/9/2020, 7:05:07 PM"
       // if duration exceeds current hour, keep counting duration for every subsequent hour
-      let currentTime = moment(entry.start, dateFormat);
-      let remainingDuration = entry.seconds;
+      let currentTime = moment(entry.start);
+      let remainingDuration = entry.duration;
       while (remainingDuration > 0) {
         const nextDuration = currentTime.clone().add(1, duration).startOf(duration);
-        const secondsTillNextDuration = nextDuration.diff(currentTime, 'seconds');
+        const msTillNextDuration = nextDuration.diff(currentTime, 'milliseconds');
         const durationKey =
           timePeriod === TimePeriod.DAY
             ? currentTime.hours() % numIntervals
             : currentTime.days() % numIntervals;
 
-        if (remainingDuration <= secondsTillNextDuration) {
+        if (remainingDuration <= msTillNextDuration) {
           durationPerHour[durationKey] += remainingDuration;
           break;
         }
 
         // add remaining time in hour to current hour bucket, then progress to next hour
-        durationPerHour[durationKey] += secondsTillNextDuration;
-        remainingDuration -= secondsTillNextDuration;
+        durationPerHour[durationKey] += msTillNextDuration;
+        remainingDuration -= msTillNextDuration;
         currentTime = nextDuration;
       }
     } catch (error) {

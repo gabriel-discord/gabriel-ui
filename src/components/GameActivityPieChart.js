@@ -10,26 +10,26 @@ const GAME_ACTIVITY_LIMIT = 7;
 const GameActivityPieChart = ({ data, height, isMobile }) => {
   const activityPerGame = {};
 
-  data.forEach(({ game, seconds }) => {
+  data.forEach(({ game, duration }) => {
     activityPerGame[game] = activityPerGame[game] || 0;
-    activityPerGame[game] += seconds;
+    activityPerGame[game] += duration;
   });
 
   const gameActivityData = Object.entries(activityPerGame)
-    .map(([game, seconds]) => ({
+    .map(([game, duration]) => ({
       game,
-      seconds,
+      duration,
     }))
-    .sort((a, b) => b.seconds - a.seconds);
+    .sort((a, b) => b.duration - a.duration);
 
   // group after top 5
   const formattedData = gameActivityData.slice(0, GAME_ACTIVITY_LIMIT);
   if (gameActivityData.length > GAME_ACTIVITY_LIMIT) {
     formattedData.push({
       game: 'Other',
-      seconds: gameActivityData
+      duration: gameActivityData
         .slice(GAME_ACTIVITY_LIMIT)
-        .reduce((acc, curr) => acc + curr.seconds, 0),
+        .reduce((acc, curr) => acc + curr.duration, 0),
     });
   }
 
@@ -38,8 +38,8 @@ const GameActivityPieChart = ({ data, height, isMobile }) => {
       callbacks: {
         label: (tooltipItem, data) => {
           const { datasetIndex, index } = tooltipItem;
-          const seconds = data.datasets[datasetIndex].data[index];
-          return `${data.labels[index]}:\n${humanizeDurationShort(seconds * 1000)}`;
+          const duration = data.datasets[datasetIndex].data[index];
+          return `${data.labels[index]}:\n${humanizeDurationShort(duration * 1000)}`;
         },
       },
     },
@@ -58,7 +58,7 @@ const GameActivityPieChart = ({ data, height, isMobile }) => {
           data={{
             datasets: [
               {
-                data: formattedData.map((activity) => activity.seconds),
+                data: formattedData.map((activity) => activity.duration),
                 backgroundColor: formattedData.map((a) => randomColor({ seed: a.game })),
               },
             ],
@@ -74,6 +74,8 @@ const GameActivityPieChart = ({ data, height, isMobile }) => {
 
 GameActivityPieChart.propTypes = {
   data: PropTypes.array.isRequired,
+  height: PropTypes.number.isRequired,
+  isMobile: PropTypes.bool.isRequired,
 };
 
 export default GameActivityPieChart;

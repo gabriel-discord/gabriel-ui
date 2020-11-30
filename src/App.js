@@ -11,7 +11,7 @@ import GameActivityBarChart from './components/GameActivityBarChart';
 import ActivePlaytimeChart from './components/ActivePlaytimeChart';
 import GameDetails from './components/GameDetails';
 import { TimePeriod } from './types';
-import { dateFormat } from './utils';
+import { formatData } from './utils';
 
 import logo from './icon.png';
 
@@ -20,34 +20,32 @@ import './App.scss';
 const { Header, Content } = Layout;
 
 function App() {
-  const now = moment(); // use to mock the current date for older data
   const [searchParams, setSearchParams] = useState({
-    user: undefined,
+    userId: undefined,
     timePeriod: TimePeriod.WEEK,
     games: [],
   });
   const { data } = useSWR('https://donchaknow.xyz/jank.json', async () => {
     try {
       const response = await axios.get('https://donchaknow.xyz/jank.json');
-      return response.data;
+      return formatData(response.data);
     } catch (error) {
       return [];
     }
   });
 
-  const { games, timePeriod, user } = searchParams;
+  const { games, timePeriod, userId } = searchParams;
 
-  let filteredData = user ? (data || []).filter((entry) => user === entry.user) : data || [];
+  let filteredData = userId ? (data || []).filter((entry) => userId === entry.userId) : data || [];
 
   if (timePeriod !== TimePeriod.FOREVER) {
-    const cutoffDate = now.clone().subtract(timePeriod, 'days');
-    filteredData = filteredData.filter((entry) =>
-      moment(entry.start, dateFormat).isAfter(cutoffDate),
-    );
+    const cutoffDate = moment().subtract(timePeriod, 'days');
+    filteredData = filteredData.filter((entry) => moment(entry.start).isAfter(cutoffDate));
   }
 
   if (games.length > 0) {
     const gameSet = new Set(games);
+    // only show selected games
     filteredData = filteredData.filter(({ game }) => {
       if (gameSet.size === 0) {
         return true;
@@ -104,7 +102,6 @@ function App() {
                   data={filteredData}
                   timePeriod={timePeriod}
                   games={games}
-                  now={now}
                   isMobile={isMobile}
                 />
               </Card>

@@ -10,20 +10,20 @@ import _ from 'lodash';
 
 const GAME_THRESHOLD = 5;
 
-const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment(), isMobile }) => {
+const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => {
   const selectedGameSet = new Set(games);
-  // calculate duration in seconds for each game
+  // calculate duration in milliseconds for each game
   const durationPerGame = {};
-  data.forEach(({ game, seconds }) => {
+  data.forEach(({ game, duration }) => {
     durationPerGame[game] = durationPerGame[game] ?? 0;
-    durationPerGame[game] += seconds;
+    durationPerGame[game] += duration;
   });
 
   // calculate top N games to display based on duration
   const topGames = new Set(
     Object.entries(durationPerGame)
-      .map(([game, seconds]) => ({ game, seconds }))
-      .sort((a, b) => b.seconds - a.seconds)
+      .map(([game, duration]) => ({ game, duration }))
+      .sort((a, b) => b.duration - a.duration)
       .slice(0, GAME_THRESHOLD)
       .map(({ game }) => game),
   );
@@ -32,7 +32,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment(),
   const entriesPerDay = {};
   data.forEach((entry) => {
     const { start } = entry;
-    const startDate = start.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)?.[0];
+    const startDate = moment(start).startOf('day').format();
     if (startDate) {
       entriesPerDay[startDate] = entriesPerDay[startDate] ?? [];
       entriesPerDay[startDate].push(entry);
@@ -46,14 +46,14 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment(),
   Object.entries(entriesPerDay).forEach(([date, dataArr]) => {
     gameDurationPerDay[date] = {};
     const gameGroup = _.groupBy(dataArr, (entry) => entry.game);
-    // group duration by seconds per game
+    // group duration by milliseconds per game
     Object.entries(gameGroup).forEach(([game, entries]) => {
       if (topGames.has(game) || selectedGameSet.size > 0) {
         gameSet.add(game);
-        gameDurationPerDay[date][game] = entries.reduce((acc, curr) => acc + curr.seconds, 0);
+        gameDurationPerDay[date][game] = entries.reduce((acc, curr) => acc + curr.duration, 0);
       } else if (selectedGameSet.size === 0) {
         gameSet.add('Other');
-        gameDurationPerDay[date]['Other'] = entries.reduce((acc, curr) => acc + curr.seconds, 0);
+        gameDurationPerDay[date]['Other'] = entries.reduce((acc, curr) => acc + curr.duration, 0);
       }
     });
   });
@@ -63,18 +63,19 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment(),
 
   const datasets = Array.from(gameSet)
     .map((game) => {
-      const date = now.clone();
+      const date = moment().startOf('day');
       const data = [];
       for (let i = 0; i < numIterations; i++) {
-        const dateString = date.format('MM/D/YYYY');
-        const seconds = gameDurationPerDay[dateString]?.[game] ?? 0;
-        data.push(seconds);
+        const dateString = date.format();
+        const duration = gameDurationPerDay[dateString]?.[game] ?? 0;
+        data.push(duration);
         date.subtract(1, 'days');
       }
       return {
         label: game,
         backgroundColor: randomColor({ seed: game }),
         data: data.reverse(),
+        // prevent bar from taking up full width if showing single day
         barPercentage: timePeriod === TimePeriod.DAY ? 0.2 : 0.9,
       };
     })
@@ -83,7 +84,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment(),
     });
 
   const labels = [];
-  const date = now.clone();
+  const date = moment();
   for (let i = 0; i < numIterations; i++) {
     labels.push(date.format('MM/DD'));
     date.subtract(1, 'day');
@@ -107,11 +108,10 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment(),
           stacked: true,
           ticks: {
             callback: (value) =>
-              humanizeDurationShort(value * 1000, {
-                units: ['h'],
+              humanizeDurationShort(value, {
+                units: ['h', 'm'],
                 round: true,
               }),
-            display: false,
           },
         },
       ],
@@ -120,8 +120,8 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, now = moment(),
       callbacks: {
         label: (tooltipItem, data) => {
           const { datasetIndex, index } = tooltipItem;
-          const seconds = data.datasets[datasetIndex].data[index];
-          return `${data.datasets[datasetIndex].label}:\n${humanizeDurationShort(seconds * 1000)}`;
+          const duration = data.datasets[datasetIndex].data[index];
+          return `${data.datasets[datasetIndex].label}:\n${humanizeDurationShort(duration)}`;
         },
       },
     },
@@ -148,7 +148,6 @@ GameActivityBarChart.propTypes = {
   timePeriod: PropTypes.number.isRequired,
   games: PropTypes.array.isRequired,
   height: PropTypes.number.isRequired,
-  now: PropTypes.object.isRequired,
 };
 
 export default GameActivityBarChart;

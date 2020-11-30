@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 
 import { getDurationInDay, humanizeDurationShort } from '../utils';
 import { TimePeriod } from '../types';
-import _ from 'lodash';
+
+import ViewToggleButton from './ViewToggleButton';
 
 const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => {
+  const [showAllGames, setShowAllGames] = useState(false);
   const GAME_THRESHOLD = 10;
   const selectedGameSet = new Set(games);
   // calculate duration in milliseconds for each game
@@ -68,7 +71,11 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
         });
       };
 
-      if (topGames.has(game) || selectedGameSet.size > 0) {
+      if (
+        topGames.has(game) ||
+        selectedGameSet.size > 0 ||
+        (selectedGameSet.size === 0 && showAllGames)
+      ) {
         addEntriesForGame(game);
       } else if (selectedGameSet.size === 0) {
         addEntriesForGame('Other');
@@ -159,12 +166,23 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
     maintainAspectRatio: false,
   };
 
+  let adjustedHeight = height - 100;
+  if (showAllGames) {
+    adjustedHeight += Math.floor(gameSet.size / 5) * 20;
+  }
+
   // chart needs to be nested in div to be responsive properly
   return (
     <>
-      <h2>Daily Activity</h2>
-      <div>
-        <Bar data={barData} options={options} height={height - 100} />
+      <div className="header-container">
+        <h2>Daily Activity</h2>
+        <ViewToggleButton
+          value={showAllGames}
+          onChange={(showAllGames) => setShowAllGames(showAllGames)}
+        />
+      </div>
+      <div style={{ height: adjustedHeight }}>
+        <Bar data={barData} options={options} />
       </div>
     </>
   );

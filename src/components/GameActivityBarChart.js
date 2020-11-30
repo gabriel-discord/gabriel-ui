@@ -10,7 +10,7 @@ import _ from 'lodash';
 
 const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => {
   const GAME_THRESHOLD =
-    timePeriod === TimePeriod.FOREVER || timePeriod === TimePeriod.MONTH ? 10 : 5;
+    timePeriod === TimePeriod.FOREVER || timePeriod === TimePeriod.MONTH ? 10 : 8;
   const selectedGameSet = new Set(games);
   // calculate duration in milliseconds for each game
   const durationPerGame = {};

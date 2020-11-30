@@ -4,3 +4,10 @@ export const TimePeriod = Object.freeze({
   MONTH: 30,
   FOREVER: Infinity,
 });
+
+export const DiscordStatus = Object.freeze({
+  ACTIVE: 'ACTIVE',
+  IDLE: 'IDLE',
+  OFFLINE: 'OFFLINE',
+  DO_NOT_DISTURB: 'DO_NOT_DISTURB',
+});

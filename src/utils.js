@@ -77,7 +77,6 @@ export const formatData = (data) => {
         aliases: [entry.user],
         tag: entry.user,
       },
-      userId: entry.user,
       start,
       stop,
       duration: stop - start,

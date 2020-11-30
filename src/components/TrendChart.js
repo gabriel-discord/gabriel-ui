@@ -49,7 +49,7 @@ const calculateDurationPerTimePeriod = (data, timePeriod) => {
   return durationPerHour;
 };
 
-const ActivePlaytimeChart = ({ data, games }) => {
+const TrendChart = ({ data, games }) => {
   const [timePeriod, setTimePeriod] = useState(TimePeriod.DAY);
   const [allowAnimation, setAllowAnimation] = useState(true);
 
@@ -170,10 +170,10 @@ const ActivePlaytimeChart = ({ data, games }) => {
   );
 };
 
-ActivePlaytimeChart.propTypes = {
+TrendChart.propTypes = {
   data: PropTypes.array.isRequired,
   timePeriod: PropTypes.number.isRequired,
   games: PropTypes.array.isRequired,
 };
 
-export default ActivePlaytimeChart;
+export default TrendChart;

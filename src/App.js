@@ -8,7 +8,7 @@ import useSWR from 'swr';
 import SearchFilters from './components/SearchFilters';
 import GameActivityPieChart from './components/GameActivityPieChart';
 import GameActivityBarChart from './components/GameActivityBarChart';
-import ActivePlaytimeChart from './components/ActivePlaytimeChart';
+import TrendChart from './components/TrendChart';
 import GameDetails from './components/GameDetails';
 import { TimePeriod } from './types';
 import { formatData } from './utils';
@@ -90,7 +90,7 @@ function App() {
             </Col>
             <Col xs={24} md={12}>
               <Card style={{ height: 330 }}>
-                <ActivePlaytimeChart data={filteredData} timePeriod={timePeriod} games={games} />
+                <TrendChart data={filteredData} timePeriod={timePeriod} games={games} />
               </Card>
             </Col>
           </Row>

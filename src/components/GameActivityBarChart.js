@@ -180,6 +180,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
         <ViewToggleButton
           value={showAllGames}
           onChange={(showAllGames) => setShowAllGames(showAllGames)}
+          disabled={gameSet.size > 0 && gameSet.size === topGames.size}
         />
       </div>
       <div style={{ height: adjustedHeight }}>

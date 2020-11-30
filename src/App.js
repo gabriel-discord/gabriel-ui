@@ -76,8 +76,9 @@ function App() {
         >
           <SearchFilters
             data={data || []}
-            value={searchParams}
+            isMobile={isMobile}
             onChange={(searchParams) => setSearchParams(searchParams)}
+            value={searchParams}
           />
           <Row>
             <Col xs={24} md={12}>

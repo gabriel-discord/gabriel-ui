@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Select, Radio } from 'antd';
 import _ from 'lodash';
+import classNames from 'classnames';
 
 import { TimePeriod } from '../types';
 
@@ -20,7 +21,7 @@ const aliases = {
   solewolf: [/kitkat/i, /keith/i, /kit/i],
 };
 
-const SearchFilters = ({ data, onChange, value }) => {
+const SearchFilters = ({ data, isMobile, onChange, value }) => {
   const users = _.uniq(data.map(({ user }) => user.id)).sort((a, b) => a.localeCompare(b));
   const gameSet = new Set(data.map((entry) => entry.game));
   const gameOptions = Array.from(gameSet)
@@ -36,10 +37,16 @@ const SearchFilters = ({ data, onChange, value }) => {
     ));
 
   return (
-    <div className="search-filters">
+    <div className={classNames('search-filters', { mobile: isMobile })}>
       <Select
+        className="user-select"
         placeholder="Select a user..."
-        style={{ width: 300, maxWidth: '100%', marginRight: 16, marginBottom: 16 }}
+        style={{
+          width: isMobile ? '100%' : 300,
+          maxWidth: '100%',
+          marginRight: 16,
+          marginBottom: 16,
+        }}
         value={value.userId}
         onChange={(userId) => onChange({ ...value, userId })}
         allowClear
@@ -64,31 +71,33 @@ const SearchFilters = ({ data, onChange, value }) => {
         ))}
       </Select>
       <Radio.Group
+        className="time-period-radio"
         optionType="button"
         buttonStyle="solid"
         value={value.timePeriod}
         onChange={(e) => onChange({ ...value, timePeriod: e.target.value })}
         options={[
           {
-            label: '24 Hours',
+            label: isMobile ? '24H' : '24 Hours',
             value: TimePeriod.DAY,
           },
           {
-            label: '7 Days',
+            label: isMobile ? '7D' : '7 Days',
             value: TimePeriod.WEEK,
           },
           {
-            label: '30 Days',
+            label: isMobile ? '30D' : '30 Days',
             value: TimePeriod.MONTH,
           },
           {
-            label: 'Forever',
+            label: isMobile ? 'ALL' : 'Forever',
             value: TimePeriod.FOREVER,
           },
         ]}
         style={{ marginBottom: 16 }}
       />
       <Select
+        className="game-select"
         mode="multiple"
         allowClear
         placeholder="Compare games..."

@@ -10,9 +10,11 @@ const GAME_ACTIVITY_LIMIT = 7;
 const GameActivityPieChart = ({ data, height, isMobile }) => {
   const activityPerGame = {};
 
+  let totalDuration = 0;
   data.forEach(({ game, duration }) => {
     activityPerGame[game] = activityPerGame[game] || 0;
     activityPerGame[game] += duration;
+    totalDuration += duration;
   });
 
   const gameActivityData = Object.entries(activityPerGame)
@@ -39,7 +41,12 @@ const GameActivityPieChart = ({ data, height, isMobile }) => {
         label: (tooltipItem, data) => {
           const { datasetIndex, index } = tooltipItem;
           const duration = data.datasets[datasetIndex].data[index];
-          return `${data.labels[index]}:\n${humanizeDurationShort(duration * 1000)}`;
+          const durationString = humanizeDurationShort(duration, {
+            units: ['d', 'h', 'm'],
+            round: true,
+          });
+          const durationPercentage = ((duration / totalDuration) * 100).toFixed(1);
+          return `${data.labels[index]}:\n${durationString} (${durationPercentage}%)`;
         },
       },
     },

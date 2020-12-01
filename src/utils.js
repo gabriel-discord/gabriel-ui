@@ -3,7 +3,7 @@ import humanizeDuration from 'humanize-duration';
 
 import { DiscordStatus } from './types';
 
-export const dateFormat = 'MM/D/YYYY, hh:mm:ss A';
+export const dateFormat = 'MM/D/YYYY, hh:mm:ss A Z';
 
 export const humanizeDurationShort = humanizeDuration.humanizer({
   language: 'shortEn',
@@ -36,6 +36,10 @@ const getDiscordStatus = (statusNum) => {
 
 export const formatData = (data) => {
   return data.map((entry) => {
+    const start = parseInt(moment(`${entry.start} -06:00`, dateFormat).format('x'));
+    const stop = parseInt(moment(`${entry.stop} -06:00`, dateFormat).format('x'));
+    const duration = stop - start;
+
     const rawStatusLog = entry.statusLog ?? [];
     const statusLog = [];
 
@@ -61,13 +65,16 @@ export const formatData = (data) => {
         statusLog.push(runningStatus);
       }
     }
+    if (rawStatusLog.length === 0) {
+      // handle missing statusLog for older entries
+      statusLog.push({
+        status: DiscordStatus.ACTIVE,
+        duration,
+      });
+    }
 
-    const start = parseInt(moment(entry.start, dateFormat).format('x'));
-    const stop = parseInt(moment(entry.stop, dateFormat).format('x'));
-
-    const duration = stop - start;
     let activeDuration;
-    if ((rawStatusLog ?? []).length > 0) {
+    if (rawStatusLog.length > 0) {
       activeDuration = statusLog
         .filter((entry) => entry.status === DiscordStatus.ACTIVE)
         .reduce((acc, curr) => acc + curr.duration, 0);

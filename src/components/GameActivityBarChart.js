@@ -192,9 +192,10 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
 
 GameActivityBarChart.propTypes = {
   data: PropTypes.array.isRequired,
-  timePeriod: PropTypes.number.isRequired,
   games: PropTypes.array.isRequired,
   height: PropTypes.number.isRequired,
+  isMobile: PropTypes.bool.isRequired,
+  timePeriod: PropTypes.number.isRequired,
 };
 
 export default GameActivityBarChart;

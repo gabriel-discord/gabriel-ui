@@ -11,7 +11,7 @@ const ViewToggleButton = ({ value, onChange, disabled = false }) => {
   }
 
   return (
-    <Tooltip title={value ? 'Show less games' : 'Show all games'} {...tooltipProps}>
+    <Tooltip title={value ? 'Show less' : 'Show all'} {...tooltipProps}>
       <Button
         shape="circle"
         size="small"

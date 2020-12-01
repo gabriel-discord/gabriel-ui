@@ -9,6 +9,7 @@ import SearchFilters from './components/SearchFilters';
 import GameActivityPieChart from './components/GameActivityPieChart';
 import GameActivityBarChart from './components/GameActivityBarChart';
 import TrendChart from './components/TrendChart';
+import TimelineChart from './components/TimelineChart';
 import GameDetails from './components/GameDetails';
 import { TimePeriod } from './types';
 import { formatData } from './utils';
@@ -25,10 +26,20 @@ function App() {
     timePeriod: TimePeriod.WEEK,
     games: [],
   });
+  const [dayData, setDayData] = useState([]);
+  const [weekData, setWeekData] = useState([]);
+  const [monthData, setMonthData] = useState([]);
   const { data } = useSWR('https://donchaknow.xyz/jank.json', async () => {
     try {
       const response = await axios.get('https://donchaknow.xyz/jank.json');
-      return formatData(response.data);
+      const data = formatData(response.data);
+      let cutoffDate = moment().subtract(1, 'days');
+      setDayData(data.filter((entry) => moment(entry.start).isAfter(cutoffDate)));
+      cutoffDate = moment().subtract(7, 'days');
+      setWeekData(data.filter((entry) => moment(entry.start).isAfter(cutoffDate)));
+      cutoffDate = moment().subtract(30, 'days');
+      setMonthData(data.filter((entry) => moment(entry.start).isAfter(cutoffDate)));
+      return data;
     } catch (error) {
       return [];
     }
@@ -36,22 +47,38 @@ function App() {
 
   const { games, timePeriod, userId } = searchParams;
 
-  let filteredData = userId ? (data || []).filter((entry) => userId === entry.user.id) : data || [];
+  // filter by selected time period
+  let filteredData;
+  if (timePeriod === TimePeriod.DAY) {
+    filteredData = dayData;
+  } else if (timePeriod === TimePeriod.WEEK) {
+    filteredData = weekData;
+  } else if (timePeriod === TimePeriod.MONTH) {
+    filteredData = monthData;
+  } else {
+    filteredData = data ?? [];
+  }
 
-  if (timePeriod !== TimePeriod.FOREVER) {
-    const cutoffDate = moment().subtract(timePeriod, 'days');
-    filteredData = filteredData.filter((entry) => moment(entry.start).isAfter(cutoffDate));
+  // timeline will always use data from past 24 hours
+  let timelineData = dayData;
+
+  if (userId) {
+    // filter by selected user
+    filteredData = filteredData.filter((entry) => userId === entry.user.id);
+    timelineData = timelineData.filter((entry) => userId === entry.user.id);
   }
 
   if (games.length > 0) {
+    // filter by selected games
     const gameSet = new Set(games);
-    // only show selected games
-    filteredData = filteredData.filter(({ game }) => {
+    const gameFilter = ({ game }) => {
       if (gameSet.size === 0) {
         return true;
       }
       return gameSet.has(game);
-    });
+    };
+    filteredData = filteredData.filter(gameFilter);
+    timelineData = timelineData.filter(gameFilter);
   }
 
   const isMobile = useMediaQuery({ query: '(max-width: 550px)' });
@@ -75,7 +102,7 @@ function App() {
           }}
         >
           <SearchFilters
-            data={data || []}
+            data={data ?? []}
             isMobile={isMobile}
             onChange={(searchParams) => setSearchParams(searchParams)}
             value={searchParams}
@@ -102,6 +129,18 @@ function App() {
                 <GameActivityBarChart
                   height={isMobile ? 550 : 400}
                   data={filteredData}
+                  timePeriod={timePeriod}
+                  games={games}
+                  isMobile={isMobile}
+                />
+              </Card>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={24}>
+              <Card>
+                <TimelineChart
+                  data={timelineData}
                   timePeriod={timePeriod}
                   games={games}
                   isMobile={isMobile}

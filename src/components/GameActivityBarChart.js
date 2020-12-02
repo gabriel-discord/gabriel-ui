@@ -86,7 +86,8 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
   // limit to displaying the last 30 days if time period is ALL
   let numDaysToGoBack;
   if (timePeriod === TimePeriod.FOREVER) {
-    numDaysToGoBack = moment().diff(earliestDate, 'days');
+    // always display at least 30 days
+    numDaysToGoBack = Math.max(moment().diff(earliestDate, 'days'), 30);
   } else {
     numDaysToGoBack = timePeriod;
   }

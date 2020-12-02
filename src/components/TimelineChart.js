@@ -79,6 +79,17 @@ const TimelineChart = ({ data, games, isMobile }) => {
         show: true,
       },
     },
+    yaxis: {
+      labels: {
+        formatter: (value) => {
+          // if there's no data, the label will default to a timestamp
+          if (typeof value !== 'string') {
+            return '';
+          }
+          return value;
+        },
+      },
+    },
     grid: {
       xaxis: {
         lines: {

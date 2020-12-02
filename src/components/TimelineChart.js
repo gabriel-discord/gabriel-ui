@@ -4,13 +4,33 @@ import Chart from 'react-apexcharts';
 import moment from 'moment';
 import randomColor from 'randomcolor';
 
+import { DiscordStatus } from '../types';
+
 const TimelineChart = ({ data, games, isMobile }) => {
+  const entries = [];
+  // break a single entry up into multiple entries based on discord status
+  data.forEach((entry) => {
+    let currentDuration = 0;
+    entry.statusLog.forEach(({ status: discordStatus, duration }) => {
+      const start = entry.start + currentDuration;
+      const stop = start + duration;
+      entries.push({
+        ...entry,
+        duration,
+        start,
+        stop,
+        discordStatus,
+      });
+      currentDuration += duration;
+    });
+  });
+
   const entriesPerGame = {};
   const durationPerUser = {};
   const gameSet = new Set();
   const userSet = new Set();
 
-  data.forEach((entry) => {
+  entries.forEach((entry) => {
     const { game } = entry;
     const user = entry.user.id;
     gameSet.add(game);
@@ -19,6 +39,8 @@ const TimelineChart = ({ data, games, isMobile }) => {
     entriesPerGame[game].push({
       x: user,
       y: [entry.start, entry.stop],
+      discordStatus: entry.discordStatus,
+      game: entry.game,
     });
     durationPerUser[user] = durationPerUser[user] ?? 0;
     durationPerUser[user] += entry.duration;
@@ -36,9 +58,6 @@ const TimelineChart = ({ data, games, isMobile }) => {
   const chartMin = parseInt(moment().subtract('24', 'hours').format('x'));
   const chartMax = parseInt(moment().format('x'));
   const labels = Array.from(userSet).sort((a, b) => a.localeCompare(b));
-  const colors = Array.from(gameSet)
-    .sort((a, b) => a.localeCompare(b))
-    .map((game) => randomColor({ seed: game }));
 
   const options = {
     plotOptions: {
@@ -68,10 +87,31 @@ const TimelineChart = ({ data, games, isMobile }) => {
       },
     },
     labels,
-    colors,
+    colors: [
+      ({ value, seriesIndex, dataPointIndex, w }) => {
+        const game = w.config.series[seriesIndex].name;
+        const discordStatus = w.config.series[seriesIndex].data[dataPointIndex]?.discordStatus;
+        return randomColor({
+          seed: game,
+          format: 'rgba',
+          alpha: discordStatus === DiscordStatus.ACTIVE ? 1 : 0.7,
+        });
+      },
+    ],
     tooltip: {
       x: {
-        formatter: (value) => moment(value).format('h:mmA'),
+        formatter: (value, opts) => moment(value).format('h:mmA'),
+      },
+      y: {
+        title: {
+          formatter: (value, { seriesIndex, dataPointIndex, w }) => {
+            const discordStatus = w.config.series[seriesIndex].data[dataPointIndex]?.discordStatus;
+            if (discordStatus === DiscordStatus.IDLE) {
+              return `${value} (IDLE)`;
+            }
+            return value;
+          },
+        },
       },
     },
     legend: {
@@ -94,7 +134,7 @@ const TimelineChart = ({ data, games, isMobile }) => {
       <div className="header-container">
         <h2>Timeline</h2>
       </div>
-      <div id="chart">
+      <div id="chart" style={{ marginTop: -20 }}>
         <Chart options={options} series={gameSeries} type="rangeBar" height={adjustedHeight} />
       </div>
     </>

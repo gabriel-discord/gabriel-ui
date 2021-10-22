@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Chart from 'react-apexcharts';
 import moment from 'moment';
@@ -7,6 +7,14 @@ import randomColor from 'randomcolor';
 import { DiscordStatus } from '../types';
 
 const TimelineChart = ({ data, games, isMobile }) => {
+  const [key, setKey] = useState(0);
+
+  // set key on div containing chart to forcefully re-mount every time data is modified
+  // this prevents old data from being carried over and causing a bug (e.g. legend selection index)
+  useEffect(() => {
+    setKey(key + 1);
+  }, [data, games, isMobile]);
+
   const entries = [];
   // break a single entry up into multiple entries based on discord status
   data.forEach((entry) => {
@@ -146,7 +154,7 @@ const TimelineChart = ({ data, games, isMobile }) => {
       <div className="header-container">
         <h2>Timeline</h2>
       </div>
-      <div id="chart" style={{ marginTop: -20 }}>
+      <div key={key} id="chart" style={{ marginTop: -20 }}>
         <Chart options={options} series={gameSeries} type="rangeBar" height={adjustedHeight} />
       </div>
     </>

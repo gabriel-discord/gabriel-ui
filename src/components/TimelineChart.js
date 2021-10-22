@@ -126,6 +126,7 @@ const TimelineChart = ({ data, games, isMobile }) => {
       },
     },
     legend: {
+      showForSingleSeries: true,
       markers: {
         radius: 0,
       },

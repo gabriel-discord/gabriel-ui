@@ -133,7 +133,7 @@ const TimelineChart = ({ data, games, isMobile }) => {
   };
 
   const gamesPerLine = isMobile ? 2 : 7;
-  let adjustedHeight = 70; // space used for default padding
+  let adjustedHeight = 90; // space used for default padding
   adjustedHeight += Math.floor(gameSet.size / gamesPerLine) * 20;
   adjustedHeight += userSet.size * 24;
   if (userSet.size === 0) {

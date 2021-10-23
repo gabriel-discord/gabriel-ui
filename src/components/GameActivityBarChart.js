@@ -140,7 +140,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
           ticks: {
             callback: (value) =>
               humanizeDurationShort(value, {
-                units: ['h'],
+                units: ['d', 'h'],
                 round: true,
               }),
           },

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Doughnut } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
@@ -9,6 +9,14 @@ import { humanizeDurationShort } from '../utils';
 const GAME_ACTIVITY_LIMIT = 8;
 
 const GameActivityPieChart = ({ data, height, isMobile }) => {
+  const [key, setKey] = useState(0);
+
+  // set key on div containing chart to forcefully re-mount every time data is modified
+  // this prevents old data from being carried over and causing a bug (e.g. legend selection index)
+  useEffect(() => {
+    setKey((prevKey) => prevKey + 1);
+  }, [data]);
+
   const activityPerGame = {};
 
   let totalDuration = 0;
@@ -61,7 +69,7 @@ const GameActivityPieChart = ({ data, height, isMobile }) => {
   return (
     <>
       <h2>Games Played</h2>
-      <div style={{ height: height - 100 }}>
+      <div key={key} style={{ height: height - 100 }}>
         <Doughnut
           data={{
             datasets: [

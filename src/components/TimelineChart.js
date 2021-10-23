@@ -12,8 +12,8 @@ const TimelineChart = ({ data, games, isMobile }) => {
   // set key on div containing chart to forcefully re-mount every time data is modified
   // this prevents old data from being carried over and causing a bug (e.g. legend selection index)
   useEffect(() => {
-    setKey(key + 1);
-  }, [data, games, isMobile]);
+    setKey((prevKey) => prevKey + 1);
+  }, [data]);
 
   const entries = [];
   // break a single entry up into multiple entries based on discord status

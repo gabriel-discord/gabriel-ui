@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
 import randomColor from 'randomcolor';
@@ -12,6 +12,14 @@ import ViewToggleButton from './ViewToggleButton';
 
 const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => {
   const [showAllGames, setShowAllGames] = useState(false);
+  const [key, setKey] = useState(0);
+
+  // set key on div containing chart to forcefully re-mount every time data is modified
+  // this prevents old data from being carried over and causing a bug (e.g. legend selection index)
+  useEffect(() => {
+    setKey((prevKey) => prevKey + 1);
+  }, [data, games]);
+
   const GAME_THRESHOLD = 10;
   const selectedGameSet = new Set(games);
   // calculate duration in milliseconds for each game
@@ -184,7 +192,7 @@ const GameActivityBarChart = ({ data, timePeriod, height, games, isMobile }) => 
           disabled={gameSet.size > 0 && gameSet.size === topGames.size}
         />
       </div>
-      <div style={{ height: adjustedHeight }}>
+      <div key={key} style={{ height: adjustedHeight }}>
         <Bar data={barData} options={options} />
       </div>
     </>
